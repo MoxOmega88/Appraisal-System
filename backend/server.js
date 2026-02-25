@@ -39,6 +39,8 @@ const professionalismRoutes = require('./routes/professionalismRoutes');
 const otherContributionRoutes = require('./routes/otherContributionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const finalReportRoutes = require('./routes/finalReportRoutes');
+const zipRoutes = require('./routes/zipRoutes');
+const pdfReportRoutes = require('./routes/pdfReportRoutes');
 
 // Initialize Express app
 const app = express();
@@ -87,6 +89,8 @@ app.use('/api/professionalism', professionalismRoutes);
 app.use('/api/other-contributions', otherContributionRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/generate-final-report', finalReportRoutes);
+app.use('/api/generate-zip', zipRoutes);
+app.use('/api/generate-pdf-report', pdfReportRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

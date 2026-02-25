@@ -77,6 +77,18 @@ export const finalReportService = {
     axios.get(`${API_BASE}/generate-final-report/${termId}`, { responseType: 'blob' })
 };
 
+// ZIP service (only files, no PDF)
+export const zipService = {
+  generate: (termId) => 
+    axios.get(`${API_BASE}/generate-zip/${termId}`, { responseType: 'blob' })
+};
+
+// PDF report service (only PDF, no files)
+export const pdfReportService = {
+  generate: (termId) => 
+    axios.get(`${API_BASE}/generate-pdf-report/${termId}`, { responseType: 'blob' })
+};
+
 // Default axios instance for direct API calls
 const api = axios.create({
   baseURL: API_BASE

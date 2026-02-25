@@ -61,7 +61,9 @@ const createController = (Model, modelName) => {
 
         // Add file path if file was uploaded
         if (req.file) {
-          recordData.filePath = `/uploads/${req.file.filename}`;
+          // Get the relative path from uploads folder
+          const relativePath = req.file.path.split('uploads')[1].replace(/\\/g, '/');
+          recordData.filePath = `/uploads${relativePath}`;
         }
 
         // Add proof URL only for configured modules (backward compatibility)
@@ -105,7 +107,9 @@ const createController = (Model, modelName) => {
 
         // Add file path if file was uploaded
         if (req.file) {
-          updateData.filePath = `/uploads/${req.file.filename}`;
+          // Get the relative path from uploads folder
+          const relativePath = req.file.path.split('uploads')[1].replace(/\\/g, '/');
+          updateData.filePath = `/uploads${relativePath}`;
         }
 
         // Add proof URL only for configured modules (backward compatibility)

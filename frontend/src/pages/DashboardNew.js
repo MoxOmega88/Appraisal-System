@@ -25,7 +25,7 @@ import {
   MenuBook as MenuBookIcon,
   Download as DownloadIcon
 } from '@mui/icons-material';
-import { termService, finalReportService } from '../services/api';
+import { termService, zipService, pdfReportService } from '../services/api';
 import axios from 'axios';
 
 const DashboardNew = () => {
@@ -33,7 +33,8 @@ const DashboardNew = () => {
   const [selectedTerm, setSelectedTerm] = useState('');
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generatingZip, setGeneratingZip] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -128,29 +129,27 @@ const DashboardNew = () => {
     }
   };
 
-  const handleGenerateFinalReport = async () => {
+  const handleGenerateZip = async () => {
     if (!selectedTerm) {
       setError('Please select a term');
       return;
     }
 
-    setGenerating(true);
+    setGeneratingZip(true);
     setError('');
     setSuccess('');
 
     try {
-      const response = await finalReportService.generate(selectedTerm);
+      const response = await zipService.generate(selectedTerm);
 
-      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       
-      // Extract filename from content-disposition header or use default
       const contentDisposition = response.headers['content-disposition'];
       const filename = contentDisposition
         ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-        : 'Faculty_Appraisal_Report.zip';
+        : 'Faculty_Files.zip';
       
       link.setAttribute('download', filename);
       document.body.appendChild(link);
@@ -158,12 +157,49 @@ const DashboardNew = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      setSuccess('Final report generated and downloaded successfully!');
+      setSuccess('ZIP file with uploaded files downloaded successfully!');
     } catch (err) {
-      setError('Failed to generate final report. Please try again.');
-      console.error('Error generating report:', err);
+      setError('Failed to generate ZIP file. Please try again.');
+      console.error('Error generating ZIP:', err);
     } finally {
-      setGenerating(false);
+      setGeneratingZip(false);
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    if (!selectedTerm) {
+      setError('Please select a term');
+      return;
+    }
+
+    setGeneratingPdf(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await pdfReportService.generate(selectedTerm);
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const contentDisposition = response.headers['content-disposition'];
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : 'Faculty_Appraisal_Report.pdf';
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setSuccess('PDF report downloaded successfully!');
+    } catch (err) {
+      setError('Failed to generate PDF report. Please try again.');
+      console.error('Error generating PDF:', err);
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
@@ -220,7 +256,7 @@ const DashboardNew = () => {
       {/* Term Selection and Actions */}
       <Card sx={{ mb: 4, p: 3 }}>
         <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <FormControl fullWidth>
               <InputLabel>Select Term</InputLabel>
               <Select
@@ -236,14 +272,14 @@ const DashboardNew = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Button
               variant="contained"
               size="large"
               fullWidth
-              startIcon={generating ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
-              onClick={handleGenerateFinalReport}
-              disabled={!selectedTerm || generating}
+              startIcon={generatingZip ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
+              onClick={handleGenerateZip}
+              disabled={!selectedTerm || generatingZip}
               sx={{ 
                 py: 1.5,
                 backgroundColor: '#1a237e',
@@ -252,7 +288,26 @@ const DashboardNew = () => {
                 }
               }}
             >
-              {generating ? 'Generating Report...' : 'Generate Final Report (ZIP)'}
+              {generatingZip ? 'Generating...' : 'Download Files (ZIP)'}
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={generatingPdf ? <CircularProgress size={20} color="inherit" /> : <DescriptionIcon />}
+              onClick={handleGeneratePDF}
+              disabled={!selectedTerm || generatingPdf}
+              sx={{ 
+                py: 1.5,
+                backgroundColor: '#2e7d32',
+                '&:hover': {
+                  backgroundColor: '#1b5e20'
+                }
+              }}
+            >
+              {generatingPdf ? 'Generating...' : 'Generate PDF Report'}
             </Button>
           </Grid>
         </Grid>

@@ -342,6 +342,7 @@ const GenericCRUDPageWithUpload = ({
                             size="small"
                             color="primary"
                             onClick={() => window.open(`http://localhost:5000${item.filePath}`, '_blank')}
+                            sx={{ cursor: 'pointer' }}
                           />
                         ) : (
                           <Chip label="No File" size="small" variant="outlined" />
