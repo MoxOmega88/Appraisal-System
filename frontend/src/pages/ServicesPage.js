@@ -42,14 +42,16 @@ export default function ServicesPage() {
             { field: 'companyName', header: 'Company Name' },
             { field: 'description', header: 'Description' },
             { field: 'date', header: 'Date', render: (val) => new Date(val).toLocaleDateString() },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'type', label: 'Type', type: 'select', required: true, options: ['MoU', 'Co-hosted Event', 'Technical Talk Series'] },
             { name: 'companyName', label: 'Company Name', required: true },
             { name: 'description', label: 'Description', fullWidth: true, multiline: true, rows: 3 },
             { name: 'date', label: 'Date', type: 'date', required: true },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ type: '', companyName: '', description: '', date: '' }}
+          initialFormData={{ type: '', companyName: '', description: '', date: '', proof: null }}
         />
       </TabPanel>
 
@@ -62,13 +64,15 @@ export default function ServicesPage() {
             { field: 'role', header: 'Role' },
             { field: 'serviceName', header: 'Service Name' },
             { field: 'description', header: 'Description' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'role', label: 'Role', type: 'select', required: true, options: ['Coordinator', 'Others'] },
             { name: 'serviceName', label: 'Service Name (e.g., NBA, NIRF)', required: true },
             { name: 'description', label: 'Description', fullWidth: true, multiline: true, rows: 3 },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ role: '', serviceName: '', description: '' }}
+          initialFormData={{ role: '', serviceName: '', description: '', proof: null }}
         />
       </TabPanel>
 
@@ -80,12 +84,14 @@ export default function ServicesPage() {
           columns={[
             { field: 'description', header: 'Description' },
             { field: 'date', header: 'Date', render: (val) => val ? new Date(val).toLocaleDateString() : 'N/A' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'description', label: 'Service Description', required: true, fullWidth: true, multiline: true, rows: 4 },
             { name: 'date', label: 'Date', type: 'date' },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ description: '', date: '' }}
+          initialFormData={{ description: '', date: '', proof: null }}
         />
       </TabPanel>
     </Box>

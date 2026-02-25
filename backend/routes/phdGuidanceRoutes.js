@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const PhDGuidance = require('../models/PhDGuidance');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for PhD Guidance
 
 const controller = createController(PhDGuidance, 'PhD Guidance');
 

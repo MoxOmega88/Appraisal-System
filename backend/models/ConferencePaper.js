@@ -35,6 +35,10 @@ const conferencePaperSchema = new mongoose.Schema({
   publicationDate: {
     type: Date,
     required: [true, 'Publication date is required']
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

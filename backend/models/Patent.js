@@ -29,6 +29,10 @@ const patentSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Patent number is required'],
     trim: true
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

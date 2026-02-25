@@ -32,7 +32,8 @@ const consultingProjectSchema = new mongoose.Schema({
   },
   completionDate: {
     type: Date
-  }
+  },
+  
 }, {
   timestamps: true
 });

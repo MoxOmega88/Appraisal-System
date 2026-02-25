@@ -34,7 +34,8 @@ const nonIndexedPublicationSchema = new mongoose.Schema({
   publicationDate: {
     type: Date,
     required: [true, 'Publication date is required']
-  }
+  },
+  
 }, {
   timestamps: true
 });

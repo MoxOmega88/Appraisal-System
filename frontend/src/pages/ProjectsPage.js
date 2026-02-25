@@ -41,6 +41,7 @@ export default function ProjectsPage() {
             { field: 'fundingAmount', header: 'Funding Amount (₹)', render: (val) => `₹${val.toLocaleString()}` },
             { field: 'category', header: 'Category' },
             { field: 'fundingAgency', header: 'Funding Agency' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'title', label: 'Project Title', required: true, fullWidth: true },
@@ -49,8 +50,9 @@ export default function ProjectsPage() {
             { name: 'fundingAgency', label: 'Funding Agency' },
             { name: 'startDate', label: 'Start Date', type: 'date' },
             { name: 'endDate', label: 'End Date', type: 'date' },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ title: '', fundingAmount: '', category: '', fundingAgency: '', startDate: '', endDate: '' }}
+          initialFormData={{ title: '', fundingAmount: '', category: '', fundingAgency: '', startDate: '', endDate: '', proof: null }}
         />
       </TabPanel>
 
@@ -64,14 +66,16 @@ export default function ProjectsPage() {
             { field: 'amount', header: 'Amount (₹)', render: (val) => `₹${val.toLocaleString()}` },
             { field: 'clientName', header: 'Client Name' },
             { field: 'completionDate', header: 'Completion Date', render: (val) => val ? new Date(val).toLocaleDateString() : 'N/A' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'title', label: 'Project Title', required: true, fullWidth: true },
             { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, inputProps: { min: 0 } },
             { name: 'clientName', label: 'Client Name' },
             { name: 'completionDate', label: 'Completion Date', type: 'date' },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ title: '', amount: '', clientName: '', completionDate: '' }}
+          initialFormData={{ title: '', amount: '', clientName: '', completionDate: '', proof: null }}
         />
       </TabPanel>
     </Box>

@@ -44,6 +44,10 @@ const journalPaperSchema = new mongoose.Schema({
   doi: {
     type: String,
     trim: true
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

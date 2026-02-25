@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const NonIndexedPublication = require('../models/NonIndexedPublication');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for Non-Indexed Publications
 
 const controller = createController(NonIndexedPublication, 'Non-Indexed Publication');
 

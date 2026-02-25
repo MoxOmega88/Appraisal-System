@@ -28,7 +28,8 @@ const mastersGuidanceSchema = new mongoose.Schema({
   remarks: {
     type: String,
     trim: true
-  }
+  },
+  
 }, {
   timestamps: true
 });

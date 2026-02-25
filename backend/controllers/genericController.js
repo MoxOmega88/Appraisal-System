@@ -59,6 +59,16 @@ const createController = (Model, modelName) => {
           facultyId: req.user._id
         };
 
+        // Add proof URL only for configured modules
+        try {
+          const proofConfig = require('../config/proofConfig');
+          if (req.file && proofConfig.has(modelName)) {
+            recordData.proofUrl = `/uploads/proofs/${req.file.filename}`;
+          }
+        } catch (e) {
+          // If config missing, fall back to previous behavior (safe: do not add)
+        }
+
         const record = await Model.create(recordData);
         res.status(201).json(record);
       } catch (error) {
@@ -86,9 +96,21 @@ const createController = (Model, modelName) => {
           return res.status(403).json({ message: 'Not authorized to update this record' });
         }
 
+        const updateData = req.body;
+
+        // Add proof URL only for configured modules
+        try {
+          const proofConfig = require('../config/proofConfig');
+          if (req.file && proofConfig.has(modelName)) {
+            updateData.proofUrl = `/uploads/proofs/${req.file.filename}`;
+          }
+        } catch (e) {
+          // ignore
+        }
+
         const updatedRecord = await Model.findByIdAndUpdate(
           req.params.id,
-          req.body,
+          updateData,
           { new: true, runValidators: true }
         );
 

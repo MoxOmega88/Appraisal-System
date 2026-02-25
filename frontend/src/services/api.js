@@ -15,11 +15,25 @@ const createCRUDService = (endpoint) => ({
   getById: (id) => 
     axios.get(`${API_BASE}/${endpoint}/${id}`),
   
-  create: (data) => 
-    axios.post(`${API_BASE}/${endpoint}`, data),
+  create: (data) => {
+    // Check if data is FormData (for file uploads)
+    if (data instanceof FormData) {
+      return axios.post(`${API_BASE}/${endpoint}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    }
+    return axios.post(`${API_BASE}/${endpoint}`, data);
+  },
   
-  update: (id, data) => 
-    axios.put(`${API_BASE}/${endpoint}/${id}`, data),
+  update: (id, data) => {
+    // Check if data is FormData (for file uploads)
+    if (data instanceof FormData) {
+      return axios.put(`${API_BASE}/${endpoint}/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    }
+    return axios.put(`${API_BASE}/${endpoint}/${id}`, data);
+  },
   
   delete: (id) => 
     axios.delete(`${API_BASE}/${endpoint}/${id}`)
@@ -56,3 +70,15 @@ export const reportService = {
   generate: (termId) => 
     axios.get(`${API_BASE}/report/${termId}`, { responseType: 'blob' })
 };
+
+// Mark which services accept proof uploads (frontend mirror of backend allow-list)
+journalPaperService.proofAllowed = true;
+conferencePaperService.proofAllowed = true;
+bookService.proofAllowed = true;
+patentService.proofAllowed = true;
+fundedProjectService.proofAllowed = true;
+awardService.proofAllowed = true;
+eventInsideService.proofAllowed = true;
+eventOutsideService.proofAllowed = true;
+otherServiceService.proofAllowed = true; // Other Services to Institution or Society
+industryRelationService.proofAllowed = true;

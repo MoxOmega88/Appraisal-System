@@ -64,7 +64,28 @@ export default function GenericCRUDPage({
 
   const handleCreate = async () => {
     try {
-      await service.create({ ...currentItem, termId: selectedTerm });
+      // Check if any file fields exist and service allows proofs
+      const hasFileField = (service && service.proofAllowed) && formFields.some(f => f.type === 'file');
+      
+      let dataToSend = { ...currentItem, termId: selectedTerm };
+      
+      if (hasFileField) {
+        const formData = new FormData();
+        
+        // Add all form fields to FormData
+        Object.keys(currentItem).forEach(key => {
+          if (currentItem[key] instanceof File) {
+            formData.append(key, currentItem[key]);
+          } else if (currentItem[key]) {
+            formData.append(key, currentItem[key]);
+          }
+        });
+        
+        formData.append('termId', selectedTerm);
+        dataToSend = formData;
+      }
+      
+      await service.create(dataToSend);
       setSuccess('Record created successfully');
       fetchItems();
       handleClose();
@@ -75,7 +96,27 @@ export default function GenericCRUDPage({
 
   const handleUpdate = async () => {
     try {
-      await service.update(currentItem._id, currentItem);
+      // Check if any file fields exist and service allows proofs
+      const hasFileField = (service && service.proofAllowed) && formFields.some(f => f.type === 'file');
+      
+      let dataToSend = currentItem;
+      
+      if (hasFileField) {
+        const formData = new FormData();
+        
+        // Add all form fields to FormData
+        Object.keys(currentItem).forEach(key => {
+          if (currentItem[key] instanceof File) {
+            formData.append(key, currentItem[key]);
+          } else if (currentItem[key]) {
+            formData.append(key, currentItem[key]);
+          }
+        });
+        
+        dataToSend = formData;
+      }
+      
+      await service.update(currentItem._id, dataToSend);
       setSuccess('Record updated successfully');
       fetchItems();
       handleClose();
@@ -136,6 +177,33 @@ export default function GenericCRUDPage({
             ))}
           </Select>
         </FormControl>
+      );
+    }
+
+    if (field.type === 'file') {
+      return (
+        <Box key={field.name}>
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                handleFieldChange(field.name, file);
+              }
+            }}
+            required={field.required}
+            style={{ display: 'block', marginBottom: '8px' }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            {field.label} (PDF only, Max 10MB)
+          </Typography>
+          {currentItem[field.name] && currentItem[field.name].name && (
+            <Typography variant="caption" color="success.main">
+              ✓ {currentItem[field.name].name}
+            </Typography>
+          )}
+        </Box>
       );
     }
 
@@ -249,7 +317,7 @@ export default function GenericCRUDPage({
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            {formFields.map((field) => (
+            {formFields.filter(f => !(f.type === 'file' && !(service && service.proofAllowed))).map((field) => (
               <Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={field.name}>
                 {renderFormField(field)}
               </Grid>

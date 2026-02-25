@@ -41,13 +41,15 @@ export default function ResearchGuidancePage() {
             { field: 'numberOfStudents', header: 'Number of Students' },
             { field: 'projectTitle', header: 'Project Title' },
             { field: 'remarks', header: 'Remarks' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true, inputProps: { min: 0 } },
             { name: 'projectTitle', label: 'Project Title', fullWidth: true },
             { name: 'remarks', label: 'Remarks', fullWidth: true, multiline: true, rows: 3 },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ numberOfStudents: '', projectTitle: '', remarks: '' }}
+          initialFormData={{ numberOfStudents: '', projectTitle: '', remarks: '', proof: null }}
         />
       </TabPanel>
 
@@ -60,13 +62,15 @@ export default function ResearchGuidancePage() {
             { field: 'numberOfStudents', header: 'Number of Students' },
             { field: 'thesisTitle', header: 'Thesis Title' },
             { field: 'remarks', header: 'Remarks' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true, inputProps: { min: 0 } },
             { name: 'thesisTitle', label: 'Thesis Title', fullWidth: true },
             { name: 'remarks', label: 'Remarks', fullWidth: true, multiline: true, rows: 3 },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ numberOfStudents: '', thesisTitle: '', remarks: '' }}
+          initialFormData={{ numberOfStudents: '', thesisTitle: '', remarks: '', proof: null }}
         />
       </TabPanel>
 
@@ -80,14 +84,16 @@ export default function ResearchGuidancePage() {
             { field: 'scholarName', header: 'Scholar Name' },
             { field: 'researchArea', header: 'Research Area' },
             { field: 'status', header: 'Status' },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true, inputProps: { min: 0 } },
             { name: 'scholarName', label: 'Scholar Name' },
             { name: 'researchArea', label: 'Research Area', fullWidth: true },
             { name: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Completed', 'Submitted'] },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ numberOfScholars: '', scholarName: '', researchArea: '', status: 'Ongoing' }}
+          initialFormData={{ numberOfScholars: '', scholarName: '', researchArea: '', status: 'Ongoing', proof: null }}
         />
       </TabPanel>
     </Box>

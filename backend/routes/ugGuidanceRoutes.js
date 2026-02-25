@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const UGGuidance = require('../models/UGGuidance');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for UG Guidance
 
 const controller = createController(UGGuidance, 'UG Guidance');
 

@@ -33,7 +33,8 @@ const phdGuidanceSchema = new mongoose.Schema({
     type: String,
     enum: ['Ongoing', 'Completed', 'Submitted'],
     default: 'Ongoing'
-  }
+  },
+  
 }, {
   timestamps: true
 });

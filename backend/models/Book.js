@@ -44,6 +44,10 @@ const bookSchema = new mongoose.Schema({
   isbn: {
     type: String,
     trim: true
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

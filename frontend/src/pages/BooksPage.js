@@ -14,6 +14,7 @@ export default function BooksPage() {
         { field: 'publisher', header: 'Publisher' },
         { field: 'authorPosition', header: 'Author Position' },
         { field: 'publicationYear', header: 'Year' },
+        { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
       ]}
       formFields={[
         { name: 'type', label: 'Type', type: 'select', required: true, options: ['Book', 'Chapter'] },
@@ -22,8 +23,9 @@ export default function BooksPage() {
         { name: 'publisher', label: 'Publisher', required: true },
         { name: 'publicationYear', label: 'Publication Year', type: 'number', required: true, inputProps: { min: 1900, max: 2100 } },
         { name: 'isbn', label: 'ISBN (Optional)' },
+        { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
       ]}
-      initialFormData={{ type: '', title: '', authorPosition: '', publisher: '', publicationYear: '', isbn: '' }}
+      initialFormData={{ type: '', title: '', authorPosition: '', publisher: '', publicationYear: '', isbn: '', proof: null }}
     />
   );
 }

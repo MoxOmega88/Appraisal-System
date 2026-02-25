@@ -41,13 +41,15 @@ export default function AwardsPage() {
             { field: 'title', header: 'Award Title' },
             { field: 'issuingBody', header: 'Issuing Body' },
             { field: 'date', header: 'Date', render: (val) => new Date(val).toLocaleDateString() },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'title', label: 'Award Title', required: true, fullWidth: true },
             { name: 'issuingBody', label: 'Issuing Body', required: true },
             { name: 'date', label: 'Date', type: 'date', required: true },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ title: '', issuingBody: '', date: '' }}
+          initialFormData={{ title: '', issuingBody: '', date: '', proof: null }}
         />
       </TabPanel>
 

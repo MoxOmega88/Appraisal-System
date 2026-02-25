@@ -40,6 +40,10 @@ const fundedProjectSchema = new mongoose.Schema({
   },
   endDate: {
     type: Date
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

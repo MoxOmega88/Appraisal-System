@@ -7,16 +7,17 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const IndustryRelation = require('../models/IndustryRelation');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../uploads/proofs/UploadMiddleware');
 
 const controller = createController(IndustryRelation, 'Industry Relation');
 
 router.route('/')
   .get(protect, controller.getAll)
-  .post(protect, controller.create);
+  .post(protect, upload.single('proof'), controller.create);
 
 router.route('/:id')
   .get(protect, controller.getById)
-  .put(protect, controller.update)
+  .put(protect, upload.single('proof'), controller.update)
   .delete(protect, controller.deleteRecord);
 
 module.exports = router;

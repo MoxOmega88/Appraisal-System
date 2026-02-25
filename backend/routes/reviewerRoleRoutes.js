@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const ReviewerRole = require('../models/ReviewerRole');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for Reviewer Roles
 
 const controller = createController(ReviewerRole, 'Reviewer Role');
 

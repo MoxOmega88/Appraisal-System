@@ -31,7 +31,8 @@ const reviewerRoleSchema = new mongoose.Schema({
   },
   year: {
     type: Number
-  }
+  },
+  
 }, {
   timestamps: true
 });

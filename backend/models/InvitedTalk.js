@@ -29,7 +29,8 @@ const invitedTalkSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: [true, 'Date is required']
-  }
+  },
+  
 }, {
   timestamps: true
 });

@@ -29,7 +29,8 @@ const institutionalServiceSchema = new mongoose.Schema({
   description: {
     type: String,
     trim: true
-  }
+  },
+  
 }, {
   timestamps: true
 });

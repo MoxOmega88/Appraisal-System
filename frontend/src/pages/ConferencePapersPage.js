@@ -13,14 +13,16 @@ export default function ConferencePapersPage() {
         { field: 'conferenceName', header: 'Conference Name' },
         { field: 'authorPosition', header: 'Author Position' },
         { field: 'publicationDate', header: 'Publication Date', render: (val) => new Date(val).toLocaleDateString() },
+        { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
       ]}
       formFields={[
         { name: 'title', label: 'Paper Title', required: true, fullWidth: true },
         { name: 'conferenceName', label: 'Conference Name', required: true, fullWidth: true },
         { name: 'authorPosition', label: 'Author Position (1-3)', type: 'number', required: true, inputProps: { min: 1, max: 3 } },
         { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true },
+        { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
       ]}
-      initialFormData={{ title: '', conferenceName: '', authorPosition: '', publicationDate: '' }}
+      initialFormData={{ title: '', conferenceName: '', authorPosition: '', publicationDate: '', proof: null }}
     />
   );
 }

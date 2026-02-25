@@ -32,7 +32,8 @@ const fdpOrganizedSchema = new mongoose.Schema({
   },
   endDate: {
     type: Date
-  }
+  },
+  
 }, {
   timestamps: true
 });

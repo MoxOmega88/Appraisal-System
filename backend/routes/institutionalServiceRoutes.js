@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const InstitutionalService = require('../models/InstitutionalService');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for Institutional Services
 
 const controller = createController(InstitutionalService, 'Institutional Service');
 

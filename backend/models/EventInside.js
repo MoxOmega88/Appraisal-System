@@ -29,6 +29,10 @@ const eventInsideSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: [true, 'Date is required']
+  },
+  proofUrl: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

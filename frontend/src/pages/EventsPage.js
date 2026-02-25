@@ -41,14 +41,16 @@ export default function EventsPage() {
             { field: 'eventName', header: 'Event Name' },
             { field: 'organization', header: 'Organization' },
             { field: 'date', header: 'Date', render: (val) => new Date(val).toLocaleDateString() },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'type', label: 'Event Type', type: 'select', required: true, options: ['FDP', 'Seminar', 'Workshop', 'Conference'] },
             { name: 'eventName', label: 'Event Name', required: true, fullWidth: true },
             { name: 'organization', label: 'Organization' },
             { name: 'date', label: 'Date', type: 'date', required: true },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ type: '', eventName: '', organization: '', date: '' }}
+          initialFormData={{ type: '', eventName: '', organization: '', date: '', proof: null }}
         />
       </TabPanel>
 
@@ -61,13 +63,15 @@ export default function EventsPage() {
             { field: 'type', header: 'Type' },
             { field: 'eventName', header: 'Event Name' },
             { field: 'date', header: 'Date', render: (val) => new Date(val).toLocaleDateString() },
+            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
           ]}
           formFields={[
             { name: 'type', label: 'Event Type', type: 'select', required: true, options: ['FDP', 'Seminar', 'Workshop', 'Conference', 'Meeting'] },
             { name: 'eventName', label: 'Event Name', required: true, fullWidth: true },
             { name: 'date', label: 'Date', type: 'date', required: true },
+            { name: 'proof', label: 'Upload Proof (PDF)', type: 'file', required: true, fullWidth: true },
           ]}
-          initialFormData={{ type: '', eventName: '', date: '' }}
+          initialFormData={{ type: '', eventName: '', date: '', proof: null }}
         />
       </TabPanel>
     </Box>

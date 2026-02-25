@@ -28,7 +28,8 @@ const ugGuidanceSchema = new mongoose.Schema({
   remarks: {
     type: String,
     trim: true
-  }
+  },
+  
 }, {
   timestamps: true
 });

@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const InvitedTalk = require('../models/InvitedTalk');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for Invited Talks
 
 const controller = createController(InvitedTalk, 'Invited Talk');
 

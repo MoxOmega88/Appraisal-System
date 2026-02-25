@@ -7,6 +7,7 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const FDPOrganized = require('../models/FDPOrganized');
 const { protect } = require('../middleware/authMiddleware');
+// no proof upload for FDP Organized
 
 const controller = createController(FDPOrganized, 'FDP Organized');
 

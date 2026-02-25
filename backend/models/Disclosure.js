@@ -28,7 +28,8 @@ const disclosureSchema = new mongoose.Schema({
   applicationNumber: {
     type: String,
     trim: true
-  }
+  },
+  
 }, {
   timestamps: true
 });
