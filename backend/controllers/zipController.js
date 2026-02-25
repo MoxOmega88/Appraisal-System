@@ -31,9 +31,12 @@ const OtherContribution = require('../models/OtherContribution');
 
 /**
  * Generate ZIP with only uploaded files (no PDF)
+ * Organized in 23 folders with sequentially named files
  * GET /api/generate-zip/:termId
  */
 exports.generateZipOnly = async (req, res) => {
+  let archive = null;
+
   try {
     const { termId } = req.params;
     const facultyId = req.user.id;
@@ -46,7 +49,7 @@ exports.generateZipOnly = async (req, res) => {
       return res.status(404).json({ message: 'Term not found' });
     }
     
-    // Fetch all appraisal data
+    // Fetch all appraisal data in official order (23 modules)
     const appraisalData = {
       fciScores: await FCIScore.find({ facultyId, termId }),
       journalPapers: await JournalPaper.find({ facultyId, termId }),
@@ -73,8 +76,35 @@ exports.generateZipOnly = async (req, res) => {
       otherContributions: await OtherContribution.find({ facultyId, termId })
     };
     
+    // Category mapping with official order (23 modules)
+    const categoryMapping = [
+      { key: 'fciScores', folder: '01_FCI_Score', moduleName: 'FCI_Score' },
+      { key: 'journalPapers', folder: '02_Journal_Papers', moduleName: 'Journal_Paper' },
+      { key: 'conferencePapers', folder: '03_Indexed_Conferences', moduleName: 'Conference_Paper' },
+      { key: 'nonIndexedPublications', folder: '04_NonIndexed_Publications', moduleName: 'NonIndexed_Publication' },
+      { key: 'books', folder: '05_Books_Chapters', moduleName: 'Book' },
+      { key: 'disclosures', folder: '06_Disclosures_Filed', moduleName: 'Disclosure' },
+      { key: 'patents', folder: '07_Patents_Granted', moduleName: 'Patent' },
+      { key: 'ugGuidance', folder: '08_UG_Guidance', moduleName: 'UG_Guidance' },
+      { key: 'mastersGuidance', folder: '09_Masters_Guidance', moduleName: 'Masters_Guidance' },
+      { key: 'phdGuidance', folder: '10_PhD_Guidance', moduleName: 'PhD_Guidance' },
+      { key: 'fundedProjects', folder: '11_Funded_Projects', moduleName: 'Funded_Project' },
+      { key: 'consultingProjects', folder: '12_Consulting_Projects', moduleName: 'Consulting_Project' },
+      { key: 'reviewerRoles', folder: '13_Reviewer_Roles', moduleName: 'Reviewer_Role' },
+      { key: 'fdpOrganized', folder: '14_FDP_Organized', moduleName: 'FDP_Organized' },
+      { key: 'invitedTalks', folder: '15_Invited_Talks', moduleName: 'Invited_Talk' },
+      { key: 'eventsOutside', folder: '16_Events_Outside', moduleName: 'Event_Outside' },
+      { key: 'eventsInside', folder: '17_Events_Inside', moduleName: 'Event_Inside' },
+      { key: 'industryRelations', folder: '18_Industry_Relations', moduleName: 'Industry_Relation' },
+      { key: 'institutionalServices', folder: '19_Institutional_Services', moduleName: 'Institutional_Service' },
+      { key: 'otherServices', folder: '20_Other_Services', moduleName: 'Other_Service' },
+      { key: 'awards', folder: '21_Awards', moduleName: 'Award' },
+      { key: 'professionalism', folder: '22_Professionalism', moduleName: 'Professionalism' },
+      { key: 'otherContributions', folder: '23_Other_Contributions', moduleName: 'Other_Contribution' }
+    ];
+    
     // Create ZIP file
-    const archive = archiver('zip', {
+    archive = archiver('zip', {
       zlib: { level: 9 }
     });
     
@@ -83,71 +113,131 @@ exports.generateZipOnly = async (req, res) => {
     res.attachment(zipFileName);
     res.setHeader('Content-Type', 'application/zip');
     
+    // Handle archive errors
+    archive.on('error', (error) => {
+      console.error('Archive error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Error creating ZIP file', error: error.message });
+      }
+    });
+    
     // Pipe archive to response
     archive.pipe(res);
     
-    // Category folder mapping
-    const categoryMapping = [
-      { key: 'fciScores', folder: '01_FCI_Score' },
-      { key: 'journalPapers', folder: '02_Journal_Papers' },
-      { key: 'conferencePapers', folder: '03_Indexed_Conferences' },
-      { key: 'nonIndexedPublications', folder: '04_NonIndexed_Publications' },
-      { key: 'books', folder: '05_Books_Chapters' },
-      { key: 'disclosures', folder: '06_Disclosures_Filed' },
-      { key: 'patents', folder: '07_Patents_Granted' },
-      { key: 'ugGuidance', folder: '08_UG_Guidance' },
-      { key: 'mastersGuidance', folder: '09_Masters_Guidance' },
-      { key: 'phdGuidance', folder: '10_PhD_Guidance' },
-      { key: 'fundedProjects', folder: '11_Funded_Projects' },
-      { key: 'consultingProjects', folder: '12_Consulting_Projects' },
-      { key: 'reviewerRoles', folder: '13_Reviewer_Roles' },
-      { key: 'fdpOrganized', folder: '14_FDP_Organized' },
-      { key: 'invitedTalks', folder: '15_Invited_Talks' },
-      { key: 'eventsOutside', folder: '16_Events_Outside' },
-      { key: 'eventsInside', folder: '17_Events_Inside' },
-      { key: 'industryRelations', folder: '18_Industry_Relations' },
-      { key: 'institutionalServices', folder: '19_Institutional_Services' },
-      { key: 'otherServices', folder: '20_Other_Services' },
-      { key: 'awards', folder: '21_Awards' },
-      { key: 'professionalism', folder: '22_Professionalism' },
-      { key: 'otherContributions', folder: '23_Other_Contributions' }
-    ];
+    let totalFilesAdded = 0;
+    let missingFiles = [];
     
-    let hasFiles = false;
-    
-    // Add files to ZIP in organized folders
+    // Process each module in official order
     for (const category of categoryMapping) {
       const data = appraisalData[category.key];
       
-      if (data && data.length > 0) {
-        for (const item of data) {
-          if (item.filePath) {
-            // Convert URL path to file system path
-            const fullPath = path.join(__dirname, '..', item.filePath.replace(/^\//, ''));
-            if (fs.existsSync(fullPath)) {
-              const fileName = path.basename(item.filePath);
-              archive.file(fullPath, { name: `${category.folder}/${fileName}` });
-              hasFiles = true;
+      // Skip modules with no data
+      if (!data || data.length === 0) {
+        console.log(`✓ Module ${category.folder}: No records (skipped)`);
+        continue;
+      }
+      
+      let fileCountForModule = 0;
+      
+      // Process each item in the module
+      for (const item of data) {
+        if (item.filePath) {
+          try {
+            // Resolve absolute file path from MongoDB stored path
+            const fullPath = path.resolve(__dirname, '..', item.filePath.replace(/^\//, ''));
+            
+            // Verify file exists
+            if (!fs.existsSync(fullPath)) {
+              const errorMsg = `FILE_NOT_FOUND: ${fullPath} for ${category.moduleName}`;
+              console.error(`❌ ${errorMsg}`);
+              missingFiles.push({
+                module: category.folder,
+                storedPath: item.filePath,
+                resolvedPath: fullPath
+              });
+              continue;
             }
+            
+            // Get file extension
+            const fileExtension = path.extname(fullPath);
+            
+            // Sequential file naming: ModuleName(1).ext, ModuleName(2).ext, etc.
+            const newFileName = `${category.moduleName}(${fileCountForModule + 1})${fileExtension}`;
+            const zipPathName = `${category.folder}/${newFileName}`;
+            
+            // Add file to archive
+            await archive.file(fullPath, { name: zipPathName });
+            
+            fileCountForModule++;
+            totalFilesAdded++;
+            
+            console.log(`✓ Added: ${zipPathName}`);
+            
+          } catch (fileError) {
+            console.error(`❌ Error processing file for ${category.folder}:`, fileError.message);
+            missingFiles.push({
+              module: category.folder,
+              storedPath: item.filePath,
+              error: fileError.message
+            });
           }
         }
       }
+      
+      if (fileCountForModule > 0) {
+        console.log(`✓ Module ${category.folder}: Added ${fileCountForModule} file(s)`);
+      }
     }
     
-    if (!hasFiles) {
-      // If no files, add a readme
-      archive.append('No files have been uploaded for this term.', { name: 'README.txt' });
+    // Add summary file with logging info
+    let summaryContent = `APPRAISAL FILE SUMMARY\n`;
+    summaryContent += `======================\n\n`;
+    summaryContent += `Faculty: ${faculty.name}\n`;
+    summaryContent += `Term: ${term.termName}\n`;
+    summaryContent += `Generated: ${new Date().toISOString()}\n\n`;
+    summaryContent += `Total Files Added: ${totalFilesAdded}\n`;
+    
+    if (missingFiles.length > 0) {
+      summaryContent += `\nMissing/Error Files (${missingFiles.length}):\n`;
+      summaryContent += `-----------------------------------------\n`;
+      missingFiles.forEach((file, index) => {
+        summaryContent += `\n${index + 1}. Module: ${file.module}\n`;
+        summaryContent += `   Stored Path: ${file.storedPath}\n`;
+        if (file.resolvedPath) {
+          summaryContent += `   Resolved Path: ${file.resolvedPath}\n`;
+        }
+        if (file.error) {
+          summaryContent += `   Error: ${file.error}\n`;
+        }
+      });
+    } else {
+      summaryContent += `\nAll files successfully added!\n`;
     }
     
-    // Finalize the archive
+    archive.append(summaryContent, { name: '_SUMMARY.txt' });
+    
+    // Finalize archive only after all files are processed
     await archive.finalize();
     
+    console.log(`✅ ZIP generation complete: ${totalFilesAdded} file(s) added`);
+    
   } catch (error) {
-    console.error('Error generating ZIP:', error);
-    res.status(500).json({ 
-      message: 'Error generating ZIP file', 
-      error: error.message 
-    });
+    console.error('❌ Error generating ZIP:', error);
+    
+    try {
+      if (archive) {
+        archive.abort();
+      }
+    } catch (abortError) {
+      console.error('Error aborting archive:', abortError);
+    }
+    
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        message: 'Error generating ZIP file', 
+        error: error.message 
+      });
+    }
   }
 };
 
