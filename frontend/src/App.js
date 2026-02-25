@@ -12,21 +12,33 @@ import { AuthProvider, useAuth } from './context/authContext';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import DashboardNew from './pages/DashboardNew';
 import TermManagement from './pages/TermManagement';
-import FCIScorePage from './pages/FCIScorePage';
-import JournalPapersPage from './pages/JournalPapersPage';
-import ConferencePapersPage from './pages/ConferencePapersPage';
-import NonIndexedPublicationsPage from './pages/NonIndexedPublicationsPage';
-import BooksPage from './pages/BooksPage';
-import DisclosuresPage from './pages/DisclosuresPage';
-import PatentsPage from './pages/PatentsPage';
-import ResearchGuidancePage from './pages/ResearchGuidancePage';
-import ProjectsPage from './pages/ProjectsPage';
-import ProfessionalActivitiesPage from './pages/ProfessionalActivitiesPage';
-import EventsPage from './pages/EventsPage';
-import ServicesPage from './pages/ServicesPage';
-import AwardsPage from './pages/AwardsPage';
+import JournalPapersPageNew from './pages/JournalPapersPageNew';
+import {
+  ConferencePapersPageNew,
+  PatentsPageNew,
+  AwardsPageNew,
+  BooksPageNew,
+  DisclosuresPageNew,
+  NonIndexedPublicationsPageNew,
+  FCIScorePageNew,
+  UGGuidancePageNew,
+  MastersGuidancePageNew,
+  PhDGuidancePageNew,
+  FundedProjectsPageNew,
+  ConsultingProjectsPageNew,
+  ReviewerRolesPageNew,
+  FDPOrganizedPageNew,
+  InvitedTalksPageNew,
+  EventsOutsidePageNew,
+  EventsInsidePageNew,
+  IndustryRelationsPageNew,
+  InstitutionalServicesPageNew,
+  OtherServicesPageNew,
+  ProfessionalismPageNew,
+  OtherContributionsPageNew
+} from './pages/UniversalModulePage';
 
 // Layout
 import Layout from './components/Layout';
@@ -117,21 +129,38 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<DashboardNew />} />
         <Route path="terms" element={<TermManagement />} />
-        <Route path="fci-scores" element={<FCIScorePage />} />
-        <Route path="journal-papers" element={<JournalPapersPage />} />
-        <Route path="conference-papers" element={<ConferencePapersPage />} />
-        <Route path="non-indexed-publications" element={<NonIndexedPublicationsPage />} />
-        <Route path="books" element={<BooksPage />} />
-        <Route path="disclosures" element={<DisclosuresPage />} />
-        <Route path="patents" element={<PatentsPage />} />
-        <Route path="research-guidance" element={<ResearchGuidancePage />} />
-        <Route path="projects" element={<ProjectsPage />} />
-        <Route path="professional-activities" element={<ProfessionalActivitiesPage />} />
-        <Route path="events" element={<EventsPage />} />
-        <Route path="services" element={<ServicesPage />} />
-        <Route path="awards" element={<AwardsPage />} />
+        <Route path="fci-scores" element={<FCIScorePageNew />} />
+        <Route path="journal-papers" element={<JournalPapersPageNew />} />
+        <Route path="conference-papers" element={<ConferencePapersPageNew />} />
+        <Route path="non-indexed-publications" element={<NonIndexedPublicationsPageNew />} />
+        <Route path="books" element={<BooksPageNew />} />
+        <Route path="disclosures" element={<DisclosuresPageNew />} />
+        <Route path="patents" element={<PatentsPageNew />} />
+        <Route path="ug-guidance" element={<UGGuidancePageNew />} />
+        <Route path="masters-guidance" element={<MastersGuidancePageNew />} />
+        <Route path="phd-guidance" element={<PhDGuidancePageNew />} />
+        <Route path="funded-projects" element={<FundedProjectsPageNew />} />
+        <Route path="consulting-projects" element={<ConsultingProjectsPageNew />} />
+        <Route path="reviewer-roles" element={<ReviewerRolesPageNew />} />
+        <Route path="fdp-organized" element={<FDPOrganizedPageNew />} />
+        <Route path="invited-talks" element={<InvitedTalksPageNew />} />
+        <Route path="events-outside" element={<EventsOutsidePageNew />} />
+        <Route path="events-inside" element={<EventsInsidePageNew />} />
+        <Route path="industry-relations" element={<IndustryRelationsPageNew />} />
+        <Route path="institutional-services" element={<InstitutionalServicesPageNew />} />
+        <Route path="other-services" element={<OtherServicesPageNew />} />
+        <Route path="professionalism" element={<ProfessionalismPageNew />} />
+        <Route path="other-contributions" element={<OtherContributionsPageNew />} />
+        <Route path="awards" element={<AwardsPageNew />} />
+        
+        {/* Legacy grouped routes */}
+        <Route path="research-guidance" element={<UGGuidancePageNew />} />
+        <Route path="projects" element={<FundedProjectsPageNew />} />
+        <Route path="professional-activities" element={<ReviewerRolesPageNew />} />
+        <Route path="events" element={<EventsInsidePageNew />} />
+        <Route path="services" element={<InstitutionalServicesPageNew />} />
       </Route>
     </Routes>
   );

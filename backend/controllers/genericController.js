@@ -59,7 +59,12 @@ const createController = (Model, modelName) => {
           facultyId: req.user._id
         };
 
-        // Add proof URL only for configured modules
+        // Add file path if file was uploaded
+        if (req.file) {
+          recordData.filePath = `/uploads/${req.file.filename}`;
+        }
+
+        // Add proof URL only for configured modules (backward compatibility)
         try {
           const proofConfig = require('../config/proofConfig');
           if (req.file && proofConfig.has(modelName)) {
@@ -98,7 +103,12 @@ const createController = (Model, modelName) => {
 
         const updateData = req.body;
 
-        // Add proof URL only for configured modules
+        // Add file path if file was uploaded
+        if (req.file) {
+          updateData.filePath = `/uploads/${req.file.filename}`;
+        }
+
+        // Add proof URL only for configured modules (backward compatibility)
         try {
           const proofConfig = require('../config/proofConfig');
           if (req.file && proofConfig.has(modelName)) {

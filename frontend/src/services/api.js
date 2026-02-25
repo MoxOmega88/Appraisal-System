@@ -71,6 +71,19 @@ export const reportService = {
     axios.get(`${API_BASE}/report/${termId}`, { responseType: 'blob' })
 };
 
+// Final report service (ZIP with PDF and files)
+export const finalReportService = {
+  generate: (termId) => 
+    axios.get(`${API_BASE}/generate-final-report/${termId}`, { responseType: 'blob' })
+};
+
+// Default axios instance for direct API calls
+const api = axios.create({
+  baseURL: API_BASE
+});
+
+export default api;
+
 // Mark which services accept proof uploads (frontend mirror of backend allow-list)
 journalPaperService.proofAllowed = true;
 conferencePaperService.proofAllowed = true;

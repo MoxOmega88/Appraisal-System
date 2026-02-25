@@ -36,7 +36,16 @@ const conferencePaperSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Publication date is required']
   },
+  quartile: {
+    type: String,
+    enum: ['Q1', 'Q2', 'Q3', 'Q4'],
+    required: [true, 'Quartile is required']
+  },
   proofUrl: {
+    type: String,
+    default: null
+  },
+  filePath: {
     type: String,
     default: null
   }

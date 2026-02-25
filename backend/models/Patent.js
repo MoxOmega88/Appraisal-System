@@ -30,7 +30,17 @@ const patentSchema = new mongoose.Schema({
     required: [true, 'Patent number is required'],
     trim: true
   },
+  status: {
+    type: String,
+    enum: ['Filed', 'Published', 'Granted'],
+    required: [true, 'Status is required'],
+    default: 'Granted'
+  },
   proofUrl: {
+    type: String,
+    default: null
+  },
+  filePath: {
     type: String,
     default: null
   }

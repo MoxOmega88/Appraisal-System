@@ -45,7 +45,16 @@ const journalPaperSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  quartile: {
+    type: String,
+    enum: ['Q1', 'Q2', 'Q3', 'Q4'],
+    required: [true, 'Quartile is required']
+  },
   proofUrl: {
+    type: String,
+    default: null
+  },
+  filePath: {
     type: String,
     default: null
   }

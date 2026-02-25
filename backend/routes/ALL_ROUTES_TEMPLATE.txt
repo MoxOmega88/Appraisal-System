@@ -1,0 +1,7 @@
+// Template for all routes - replace old upload import with:
+const { upload } = require('../middleware/uploadMiddleware');
+
+// Replace upload.single('proof') with:
+upload.single('file')
+
+// This applies to all routes except: authRoutes, termRoutes, reportRoutes, finalReportRoutes

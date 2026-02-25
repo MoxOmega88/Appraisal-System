@@ -38,6 +38,7 @@ const awardRoutes = require('./routes/awardRoutes');
 const professionalismRoutes = require('./routes/professionalismRoutes');
 const otherContributionRoutes = require('./routes/otherContributionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const finalReportRoutes = require('./routes/finalReportRoutes');
 
 // Initialize Express app
 const app = express();
@@ -85,6 +86,7 @@ app.use('/api/awards', awardRoutes);
 app.use('/api/professionalism', professionalismRoutes);
 app.use('/api/other-contributions', otherContributionRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/generate-final-report', finalReportRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
