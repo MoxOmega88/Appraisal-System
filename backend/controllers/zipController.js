@@ -241,4 +241,167 @@ exports.generateZipOnly = async (req, res) => {
   }
 };
 
-module.exports = exports;
+
+
+async function generateZip(req, res) {
+  let archive = null;
+
+  // helper: recursively collect any "filePath" values in an object/array
+  function extractFilePaths(obj, results = []) {
+    if (!obj || typeof obj !== 'object') return results;
+    if (Array.isArray(obj)) {
+      for (const el of obj) extractFilePaths(el, results);
+    } else {
+      for (const key of Object.keys(obj)) {
+        if (key === 'filePath' && typeof obj[key] === 'string') {
+          results.push(obj[key]);
+        } else {
+          extractFilePaths(obj[key], results);
+        }
+      }
+    }
+    return results;
+  }
+
+  // configuration for all 23 modules in official order
+  const MODULE_CONFIG = [
+    { order: 1, name: 'FCI Score (Average of all courses handled)', model: FCIScore, fileFields: ['documents'] },
+    { order: 2, name: 'No. of refereed journal papers in SJR/Scopus/Web of Science (Faculty among first 3 authors)', model: JournalPaper, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 3, name: 'No. of indexed conference papers in SJR/Scopus/Web of Science (Faculty among first 3 authors)', model: ConferencePaper, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 4, name: 'No. of non-refereed journals and non-indexed conferences (Faculty among first 3 authors)', model: NonIndexedPublication, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 5, name: 'Books/Chapters (Books + Book Chapters)', model: Book, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 6, name: 'Disclosures Filed', model: Disclosure, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 7, name: 'Patents Granted', model: Patent, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 8, name: 'Research Guidance Under Graduate Program', model: UGGuidance, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 9, name: 'Research Guidance Master\'s Program', model: MastersGuidance, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 10, name: 'Research Guidance Ph.D.', model: PhDGuidance, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 11, name: 'Funded Projects (>=10L, >=5L<10L, >=1L<5L, <1L)', model: FundedProject, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 12, name: 'Consulting Projects', model: ConsultingProject, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 13, name: 'Conference Chair / Session Chair / Reviewer of Q1 or Q2 Journal', model: ReviewerRole, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 14, name: 'FDP/Seminar/Workshop Organized as Coordinator (5 Days, 3 Days)', model: FDPOrganized, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 15, name: 'Invited Technical Talks Outside Institute', model: InvitedTalk, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 16, name: 'Events Participated Outside Institute', model: EventOutside, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 17, name: 'Events Participated Inside Institute', model: EventInside, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 18, name: 'Industry Relations (MoU, Co-hosted Event, Technical Talk Series)', model: IndustryRelation, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 19, name: 'Institutional/Departmental Services (Coordinator, Others)', model: InstitutionalService, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 20, name: 'Other Services to Institution or Society', model: OtherService, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 21, name: 'Awards and Honours', model: Award, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 22, name: 'Professionalism / Team Spirit', model: Professionalism, fileFields: ['documents', 'files', 'attachments'] },
+    { order: 23, name: 'Any Other Major Contributions', model: OtherContribution, fileFields: ['documents', 'files', 'attachments'] }
+  ];
+
+  try {
+    const { termId } = req.params;
+    const facultyId = req.user.id || req.user._id;
+
+    const faculty = await User.findById(facultyId);
+    const term = await Term.findById(termId);
+
+    if (!term) {
+      return res.status(404).json({ message: 'Term not found' });
+    }
+
+    // query all modules
+    const results = {};
+    for (const cfg of MODULE_CONFIG) {
+      results[cfg.order] = await cfg.model.find({ facultyId, termId });
+    }
+
+    // prepare archive
+    archive = archiver('zip', { zlib: { level: 9 } });
+    const zipFileName = `${faculty.name.replace(/\s+/g, '_')}_${term.termName.replace(/\s+/g, '_')}_Appraisal.zip`;
+    res.attachment(zipFileName);
+    res.setHeader('Content-Type', 'application/zip');
+
+    archive.on('error', (error) => {
+      console.error('Archive error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Error creating ZIP file', error: error.message });
+      }
+    });
+
+    archive.pipe(res);
+
+    let totalFilesAdded = 0;
+    const missingFiles = [];
+    let anyFileAdded = false;
+
+    for (const cfg of MODULE_CONFIG) {
+      const records = results[cfg.order] || [];
+      if (!records.length) {
+        console.log(`✓ Module ${cfg.order} (${cfg.name}): No records`);
+        continue;
+      }
+
+      const folderName = String(cfg.order).padStart(2, '0') + '_' +
+        cfg.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+      let fileCount = 0;
+
+      for (const rec of records) {
+        const paths = extractFilePaths(rec);
+        for (const relPath of paths) {
+          const fullPath = path.resolve(__dirname, '..', relPath.replace(/^\/?\.?\//, ''));
+          if (!fs.existsSync(fullPath)) {
+            console.warn('Missing file:', fullPath);
+            missingFiles.push({ module: folderName, storedPath: relPath, resolvedPath: fullPath });
+            continue;
+          }
+
+          const ext = path.extname(fullPath);
+          fileCount++;
+          const cleanName = cfg.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+          const newName = `${cleanName}(${fileCount})${ext}`;
+          const zipPath = `${folderName}/${newName}`;
+
+          await archive.file(fullPath, { name: zipPath });
+          totalFilesAdded++;
+          anyFileAdded = true;
+          console.log(`✓ Added: ${zipPath}`);
+        }
+      }
+
+      if (fileCount) {
+        console.log(`✓ Module ${folderName}: Added ${fileCount} file(s)`);
+      }
+    }
+
+    if (!anyFileAdded) {
+      archive.append('No files found for any module.', { name: 'message.txt' });
+    }
+
+    // summary
+    let summary = `APPRAISAL FILE SUMMARY\n`;
+    summary += `======================\n\n`;
+    summary += `Faculty: ${faculty.name}\n`;
+    summary += `Term: ${term.termName}\n`;
+    summary += `Generated: ${new Date().toISOString()}\n\n`;
+    summary += `Total Files Added: ${totalFilesAdded}\n`;
+    if (missingFiles.length) {
+      summary += `\nMissing/Error Files (${missingFiles.length}):\n`;
+      summary += `-----------------------------------------\n`;
+      missingFiles.forEach((f, i) => {
+        summary += `\n${i + 1}. Module: ${f.module}\n`;
+        summary += `   Stored Path: ${f.storedPath}\n`;
+        if (f.resolvedPath) summary += `   Resolved Path: ${f.resolvedPath}\n`;
+        if (f.error) summary += `   Error: ${f.error}\n`;
+      });
+    } else {
+      summary += `\nAll files successfully added!\n`;
+    }
+    archive.append(summary, { name: '_SUMMARY.txt' });
+
+    await archive.finalize();
+    console.log(`✅ ZIP generation complete: ${totalFilesAdded} file(s) added`);
+
+  } catch (error) {
+    console.error('❌ Error generating ZIP:', error);
+    if (archive) {
+      try { archive.abort(); } catch (e) { console.error('Error aborting archive:', e); }
+    }
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Error generating ZIP file', error: error.message });
+    }
+  }
+}
+
+module.exports = { generateZipOnly: exports.generateZipOnly, generateZip };

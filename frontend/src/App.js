@@ -151,16 +151,9 @@ function AppRoutes() {
         <Route path="industry-relations" element={<IndustryRelationsPageNew />} />
         <Route path="institutional-services" element={<InstitutionalServicesPageNew />} />
         <Route path="other-services" element={<OtherServicesPageNew />} />
+        <Route path="awards" element={<AwardsPageNew />} />
         <Route path="professionalism" element={<ProfessionalismPageNew />} />
         <Route path="other-contributions" element={<OtherContributionsPageNew />} />
-        <Route path="awards" element={<AwardsPageNew />} />
-        
-        {/* Legacy grouped routes */}
-        <Route path="research-guidance" element={<UGGuidancePageNew />} />
-        <Route path="projects" element={<FundedProjectsPageNew />} />
-        <Route path="professional-activities" element={<ReviewerRolesPageNew />} />
-        <Route path="events" element={<EventsInsidePageNew />} />
-        <Route path="services" element={<InstitutionalServicesPageNew />} />
       </Route>
     </Routes>
   );

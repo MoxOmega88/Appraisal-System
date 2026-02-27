@@ -7,17 +7,18 @@ const router = express.Router();
 const createController = require('../controllers/genericController');
 const ReviewerRole = require('../models/ReviewerRole');
 const { protect } = require('../middleware/authMiddleware');
-// no proof upload for Reviewer Roles
+const { upload } = require('../middleware/uploadMiddleware');
+// file upload supported for Reviewer Roles
 
 const controller = createController(ReviewerRole, 'Reviewer Role');
 
 router.route('/')
   .get(protect, controller.getAll)
-  .post(protect, controller.create);
+  .post(protect, upload.single('file'), controller.create);
 
 router.route('/:id')
   .get(protect, controller.getById)
-  .put(protect, controller.update)
+  .put(protect, upload.single('file'), controller.update)
   .delete(protect, controller.deleteRecord);
 
 module.exports = router;

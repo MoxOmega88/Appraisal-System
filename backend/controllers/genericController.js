@@ -59,6 +59,13 @@ const createController = (Model, modelName) => {
           facultyId: req.user._id
         };
 
+        // ensure termId is propagated from query/body/params when available
+        if (!recordData.termId) {
+          if (req.body.termId) recordData.termId = req.body.termId;
+          else if (req.query.termId) recordData.termId = req.query.termId;
+          else if (req.params.termId) recordData.termId = req.params.termId;
+        }
+
         // Add file path if file was uploaded
         if (req.file) {
           // Get the relative path from uploads folder
@@ -80,6 +87,13 @@ const createController = (Model, modelName) => {
         res.status(201).json(record);
       } catch (error) {
         console.error(`Create ${modelName} error:`, error);
+        if (error.name === 'ValidationError') {
+          const msgs = Object.values(error.errors).map(e => e.message).join(', ');
+          return res.status(400).json({
+            message: `Validation failed: ${msgs}`,
+            error: error.message
+          });
+        }
         res.status(400).json({ 
           message: `Error creating ${modelName}`, 
           error: error.message 
@@ -103,7 +117,14 @@ const createController = (Model, modelName) => {
           return res.status(403).json({ message: 'Not authorized to update this record' });
         }
 
-        const updateData = req.body;
+        const updateData = { ...req.body };
+
+        // ensure termId is preserved if sent via query/params
+        if (!updateData.termId) {
+          if (req.body.termId) updateData.termId = req.body.termId;
+          else if (req.query.termId) updateData.termId = req.query.termId;
+          else if (req.params.termId) updateData.termId = req.params.termId;
+        }
 
         // Add file path if file was uploaded
         if (req.file) {
@@ -131,6 +152,13 @@ const createController = (Model, modelName) => {
         res.json(updatedRecord);
       } catch (error) {
         console.error(`Update ${modelName} error:`, error);
+        if (error.name === 'ValidationError') {
+          const msgs = Object.values(error.errors).map(e => e.message).join(', ');
+          return res.status(400).json({
+            message: `Validation failed: ${msgs}`,
+            error: error.message
+          });
+        }
         res.status(400).json({ message: `Error updating ${modelName}`, error: error.message });
       }
     },

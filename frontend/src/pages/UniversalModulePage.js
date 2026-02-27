@@ -60,8 +60,10 @@ const moduleConfigs = {
     apiEndpoint: '/non-indexed-publications',
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true },
-      { name: 'venue', label: 'Venue', type: 'text', required: true },
-      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true }
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['Journal', 'Conference'] },
+      { name: 'authorPosition', label: 'Author Position', type: 'number', required: true },
+      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true },
+      { name: 'proofUrl', label: 'Proof URL', type: 'text', required: false }
     ]
   },
   'fci-scores': {
@@ -79,6 +81,7 @@ const moduleConfigs = {
     fields: [
       { name: 'studentName', label: 'Student Name', type: 'text', required: true },
       { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
+      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
       { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
     ]
   },
@@ -86,38 +89,41 @@ const moduleConfigs = {
     title: "Master's Research Guidance",
     apiEndpoint: '/masters-guidance',
     fields: [
-      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
-      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
+      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
+      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: false },
+      { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
   'phd-guidance': {
     title: 'PhD Research Guidance',
     apiEndpoint: '/phd-guidance',
     fields: [
-      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
-      { name: 'status', label: 'Status', type: 'select', required: true, options: ['Ongoing', 'Completed', 'Submitted'] },
-      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
+      { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true },
+      { name: 'scholarName', label: 'Scholar Name', type: 'text', required: false },
+      { name: 'researchArea', label: 'Research Area', type: 'text', required: false },
+      { name: 'status', label: 'Status', type: 'select', required: true, options: ['Ongoing', 'Completed', 'Submitted'] }
     ]
   },
   'funded-projects': {
     title: 'Funded Projects',
     apiEndpoint: '/funded-projects',
     fields: [
-      { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
-      { name: 'fundingAgency', label: 'Funding Agency', type: 'text', required: true },
-      { name: 'amount', label: 'Amount', type: 'number', required: true },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: true }
+      { name: 'title', label: 'Project Title', type: 'text', required: true },
+      { name: 'fundingAmount', label: 'Funding Amount', type: 'number', required: true },
+      { name: 'category', label: 'Category', type: 'select', required: true, options: ['≥10 Lakhs','5-10 Lakhs','1-5 Lakhs','<1 Lakh'] },
+      { name: 'fundingAgency', label: 'Funding Agency', type: 'text', required: false },
+      { name: 'startDate', label: 'Start Date', type: 'date', required: false },
+      { name: 'endDate', label: 'End Date', type: 'date', required: false }
     ]
   },
   'consulting-projects': {
     title: 'Consulting Projects',
     apiEndpoint: '/consulting-projects',
     fields: [
-      { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
-      { name: 'organization', label: 'Organization', type: 'text', required: true },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: true }
+      { name: 'title', label: 'Project Title', type: 'text', required: true },
+      { name: 'amount', label: 'Amount', type: 'number', required: true },
+      { name: 'clientName', label: 'Client Name', type: 'text', required: false },
+      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
     ]
   },
   'reviewer-roles': {
