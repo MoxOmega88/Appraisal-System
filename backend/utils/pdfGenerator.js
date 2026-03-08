@@ -46,31 +46,31 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
       doc.fontSize(14).fillColor('#1a237e').text('Appraisal Summary', { underline: true });
       doc.moveDown(1);
 
-      // Categories
+      // Categories with correct field mappings
       const categories = [
         { key: 'fciScores', title: '1. FCI Score', fields: ['courseCode', 'courseName', 'score'] },
-        { key: 'journalPapers', title: '2. Refereed Journal Papers', fields: ['title', 'journalName', 'quartile', 'indexedIn'] },
-        { key: 'conferencePapers', title: '3. Indexed Conference Papers', fields: ['title', 'conferenceName', 'quartile'] },
-        { key: 'nonIndexedPublications', title: '4. Non-Indexed Publications', fields: ['title', 'venue'] },
-        { key: 'books', title: '5. Books / Book Chapters', fields: ['title', 'publisher', 'isbn'] },
-        { key: 'disclosures', title: '6. Disclosures Filed', fields: ['title', 'filingDate'] },
-        { key: 'patents', title: '7. Patents', fields: ['title', 'patentNumber', 'status'] },
-        { key: 'ugGuidance', title: '8. UG Research Guidance', fields: ['studentName', 'projectTitle'] },
-        { key: 'mastersGuidance', title: '9. Master\'s Research Guidance', fields: ['studentName', 'thesisTitle'] },
-        { key: 'phdGuidance', title: '10. PhD Research Guidance', fields: ['studentName', 'thesisTitle', 'status'] },
-        { key: 'fundedProjects', title: '11. Funded Projects', fields: ['projectTitle', 'fundingAgency', 'amount'] },
-        { key: 'consultingProjects', title: '12. Consulting Projects', fields: ['projectTitle', 'organization'] },
-        { key: 'reviewerRoles', title: '13. Reviewer Roles', fields: ['venue', 'role'] },
-        { key: 'fdpOrganized', title: '14. FDP/Events Organized', fields: ['eventName', 'role'] },
-        { key: 'invitedTalks', title: '15. Invited Talks', fields: ['title', 'venue'] },
-        { key: 'eventsOutside', title: '16. Events Outside Institute', fields: ['eventName', 'organizer'] },
-        { key: 'eventsInside', title: '17. Events Inside Institute', fields: ['eventName', 'role'] },
-        { key: 'industryRelations', title: '18. Industry Relations', fields: ['organization', 'type'] },
-        { key: 'institutionalServices', title: '19. Institutional Services', fields: ['serviceName', 'role'] },
-        { key: 'otherServices', title: '20. Other Services', fields: ['serviceName'] },
-        { key: 'awards', title: '21. Awards & Honours', fields: ['awardName', 'awardedBy'] },
+        { key: 'journalPapers', title: '2. Refereed Journal Papers', fields: ['title', 'journalName', 'quartile', 'indexedIn', 'year'] },
+        { key: 'conferencePapers', title: '3. Indexed Conference Papers', fields: ['title', 'conferenceName', 'quartile', 'year'] },
+        { key: 'nonIndexedPublications', title: '4. Non-Indexed Publications', fields: ['title', 'venueName', 'year'] },
+        { key: 'books', title: '5. Books / Book Chapters', fields: ['title', 'publisher', 'isbn', 'year'] },
+        { key: 'disclosures', title: '6. Disclosures Filed', fields: ['title', 'filingDate', 'applicationNumber'] },
+        { key: 'patents', title: '7. Patents', fields: ['title', 'patentNumber', 'status', 'grantDate'] },
+        { key: 'ugGuidance', title: '8. UG Research Guidance', fields: ['numberOfStudents', 'projectTitle', 'remarks'] },
+        { key: 'mastersGuidance', title: '9. Master\'s Research Guidance', fields: ['numberOfStudents', 'thesisTitle', 'remarks'] },
+        { key: 'phdGuidance', title: '10. PhD Research Guidance', fields: ['numberOfScholars', 'scholarName', 'researchArea', 'status'] },
+        { key: 'fundedProjects', title: '11. Funded Projects', fields: ['projectTitle', 'fundingAgency', 'amount', 'duration'] },
+        { key: 'consultingProjects', title: '12. Consulting Projects', fields: ['projectTitle', 'organization', 'amount'] },
+        { key: 'reviewerRoles', title: '13. Reviewer Roles', fields: ['roleType', 'venueName', 'year', 'isQ1Q2Reviewer'] },
+        { key: 'fdpOrganized', title: '14. FDP/Events Organized', fields: ['eventTitle', 'durationCategory', 'startDate'] },
+        { key: 'invitedTalks', title: '15. Invited Talks', fields: ['title', 'organization', 'date'] },
+        { key: 'eventsOutside', title: '16. Events Outside Institute', fields: ['eventName', 'organizer', 'date'] },
+        { key: 'eventsInside', title: '17. Events Inside Institute', fields: ['eventName', 'role', 'date'] },
+        { key: 'industryRelations', title: '18. Industry Relations', fields: ['type', 'companyName', 'description', 'date'] },
+        { key: 'institutionalServices', title: '19. Institutional Services', fields: ['role', 'serviceName', 'description'] },
+        { key: 'otherServices', title: '20. Other Services', fields: ['description', 'date'] },
+        { key: 'awards', title: '21. Awards & Honours', fields: ['title', 'issuingBody', 'date'] },
         { key: 'professionalism', title: '22. Professionalism', fields: ['rating', 'remarks'] },
-        { key: 'otherContributions', title: '23. Other Contributions', fields: ['title', 'description'] }
+        { key: 'otherContributions', title: '23. Other Contributions', fields: ['description'] }
       ];
 
       categories.forEach((category, catIndex) => {
@@ -113,19 +113,37 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
             // Sl No
             doc.text((index + 1).toString(), 55, rowY, { width: colWidths.slNo - 10, align: 'center' });
 
-            // Details
+            // Details - format field names properly
             const details = category.fields.map(field => {
-              if (item[field]) {
-                const fieldName = field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1');
-                if (field.includes('Date') || field.includes('date')) {
-                  return `${fieldName}: ${new Date(item[field]).toLocaleDateString()}`;
+              if (item[field] !== undefined && item[field] !== null && item[field] !== '') {
+                // Convert camelCase to readable format
+                let fieldLabel = field
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/^./, str => str.toUpperCase())
+                  .trim();
+                
+                // Handle special cases
+                if (field === 'isQ1Q2Reviewer') {
+                  fieldLabel = 'Q1/Q2 Reviewer';
+                  return `${fieldLabel}: ${item[field] ? 'Yes' : 'No'}`;
                 }
-                return `${fieldName}: ${item[field]}`;
+                
+                // Format dates
+                if (field.toLowerCase().includes('date')) {
+                  return `${fieldLabel}: ${new Date(item[field]).toLocaleDateString()}`;
+                }
+                
+                // Format numbers
+                if (field === 'amount') {
+                  return `${fieldLabel}: ₹${item[field].toLocaleString()}`;
+                }
+                
+                return `${fieldLabel}: ${item[field]}`;
               }
               return '';
             }).filter(Boolean).join(', ');
 
-            doc.text(details || 'No details', 95, rowY, { width: colWidths.details - 10 });
+            doc.text(details || 'Entry ' + (index + 1), 95, rowY, { width: colWidths.details - 10 });
 
             // Appendix
             const hasAppendix = item.filePath ? 'Y' : 'NA';

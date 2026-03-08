@@ -30,6 +30,16 @@ const invitedTalkSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Date is required']
   },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
   
 }, {
   timestamps: true

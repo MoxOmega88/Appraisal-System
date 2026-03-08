@@ -33,6 +33,16 @@ const consultingProjectSchema = new mongoose.Schema({
   completionDate: {
     type: Date
   },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
   
 }, {
   timestamps: true

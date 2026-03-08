@@ -1,8 +1,3 @@
-/**
- * Journal Paper Model
- * Refereed Journal Papers (SJR/Scopus/WoS)
- */
-
 const mongoose = require('mongoose');
 
 const journalPaperSchema = new mongoose.Schema({
@@ -31,6 +26,11 @@ const journalPaperSchema = new mongoose.Schema({
     required: [true, 'Indexing information is required'],
     enum: ['SJR', 'Scopus', 'WoS', 'SJR & Scopus', 'SJR & WoS', 'Scopus & WoS', 'All']
   },
+  quartile: {
+    type: String,
+    enum: ['Q1', 'Q2', 'Q3', 'Q4'],
+    required: [true, 'Quartile is required']
+  },
   authorPosition: {
     type: Number,
     required: [true, 'Author position is required'],
@@ -45,19 +45,15 @@ const journalPaperSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  quartile: {
-    type: String,
-    enum: ['Q1', 'Q2', 'Q3', 'Q4'],
-    required: [true, 'Quartile is required']
-  },
-  proofUrl: {
-    type: String,
-    default: null
-  },
-  filePath: {
-    type: String,
-    default: null
-  }
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

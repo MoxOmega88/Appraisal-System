@@ -33,6 +33,16 @@ const fdpOrganizedSchema = new mongoose.Schema({
   endDate: {
     type: Date
   },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
   
 }, {
   timestamps: true

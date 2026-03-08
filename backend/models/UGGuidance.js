@@ -29,6 +29,16 @@ const ugGuidanceSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
   
 }, {
   timestamps: true

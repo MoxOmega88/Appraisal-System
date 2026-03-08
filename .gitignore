@@ -71,3 +71,7 @@ Thumbs.db
 # Temporary folders
 tmp/
 temp/
+
+# Uploaded files
+backend/uploads/
+uploads/

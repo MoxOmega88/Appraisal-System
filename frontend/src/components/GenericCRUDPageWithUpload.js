@@ -49,6 +49,7 @@ const GenericCRUDPageWithUpload = ({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
     if (termRequired) {
@@ -112,6 +113,7 @@ const GenericCRUDPageWithUpload = ({
     setOpen(false);
     setCurrentItem({});
     setUploadedFile(null);
+    setUploadedFiles([]);
     setError('');
   };
 
@@ -122,8 +124,8 @@ const GenericCRUDPageWithUpload = ({
     });
   };
 
-  const handleFileSelect = (file) => {
-    setUploadedFile(file);
+  const handleFileSelect = (files) => {
+    setUploadedFiles(files || []);
   };
 
   const handleSubmit = async () => {
@@ -142,8 +144,10 @@ const GenericCRUDPageWithUpload = ({
       });
 
       // Append file if selected
-      if (uploadedFile) {
-        formData.append('file', uploadedFile);
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        uploadedFiles.forEach(file => {
+          formData.append('documents', file);
+        });
       }
 
       if (editMode) {
@@ -335,17 +339,23 @@ const GenericCRUDPageWithUpload = ({
                     ))}
                     {supportsFileUpload && (
                       <TableCell align="center">
-                        {item.filePath ? (
+                        {item.documents && item.documents.length > 0 ? (
                           <Chip
                             icon={<AttachFileIcon />}
-                            label="View"
+                            label={`${item.documents.length} file(s)`}
                             size="small"
                             color="primary"
-                            onClick={() => window.open(`http://localhost:5000${item.filePath}`, '_blank')}
+                            onClick={() => {
+                              // Open first document - normalize path for Windows
+                              const doc = item.documents[0];
+                              const normalizedPath = doc.filePath.replace(/\\/g, '/');
+                              const urlPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+                              window.open(`http://localhost:5000${urlPath}`, '_blank');
+                            }}
                             sx={{ cursor: 'pointer' }}
                           />
                         ) : (
-                          <Chip label="No File" size="small" variant="outlined" />
+                          <Chip label="No Files" size="small" variant="outlined" />
                         )}
                       </TableCell>
                     )}

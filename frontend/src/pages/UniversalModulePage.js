@@ -1,7 +1,6 @@
 import React from 'react';
 import GenericCRUDPageWithUpload from '../components/GenericCRUDPageWithUpload';
 
-// Configuration for all modules
 const moduleConfigs = {
   'conference-papers': {
     title: 'Indexed Conference Papers',
@@ -11,8 +10,7 @@ const moduleConfigs = {
       { name: 'conferenceName', label: 'Conference Name', type: 'text', required: true },
       { name: 'quartile', label: 'Quartile', type: 'select', required: true, options: ['Q1', 'Q2', 'Q3', 'Q4'] },
       { name: 'authorPosition', label: 'Author Position', type: 'number', required: true },
-      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true },
-      { name: 'proofUrl', label: 'Proof URL', type: 'text', required: false }
+      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true }
     ]
   },
   'patents': {
@@ -22,28 +20,28 @@ const moduleConfigs = {
       { name: 'title', label: 'Patent Title', type: 'text', required: true },
       { name: 'patentNumber', label: 'Patent Number', type: 'text', required: true },
       { name: 'status', label: 'Status', type: 'select', required: true, options: ['Filed', 'Published', 'Granted'] },
-      { name: 'grantDate', label: 'Grant Date', type: 'date', required: true },
-      { name: 'proofUrl', label: 'Proof URL', type: 'text', required: false }
+      { name: 'grantDate', label: 'Grant Date', type: 'date', required: true }
     ]
   },
   'awards': {
     title: 'Awards & Honours',
     apiEndpoint: '/awards',
     fields: [
-      { name: 'awardName', label: 'Award Name', type: 'text', required: true },
-      { name: 'awardedBy', label: 'Awarded By', type: 'text', required: true },
-      { name: 'awardDate', label: 'Award Date', type: 'date', required: true },
-      { name: 'description', label: 'Description', type: 'textarea', required: false }
+      { name: 'title', label: 'Award Title', type: 'text', required: true },
+      { name: 'issuingBody', label: 'Issuing Body', type: 'text', required: true },
+      { name: 'date', label: 'Award Date', type: 'date', required: true }
     ]
   },
   'books': {
     title: 'Books / Book Chapters',
     apiEndpoint: '/books',
     fields: [
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['Book', 'Chapter'] },
       { name: 'title', label: 'Title', type: 'text', required: true },
+      { name: 'authorPosition', label: 'Author Position', type: 'number', required: true },
       { name: 'publisher', label: 'Publisher', type: 'text', required: true },
-      { name: 'isbn', label: 'ISBN', type: 'text', required: false },
-      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true }
+      { name: 'publicationYear', label: 'Publication Year', type: 'number', required: true },
+      { name: 'isbn', label: 'ISBN', type: 'text', required: false }
     ]
   },
   'disclosures': {
@@ -52,7 +50,7 @@ const moduleConfigs = {
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'filingDate', label: 'Filing Date', type: 'date', required: true },
-      { name: 'description', label: 'Description', type: 'textarea', required: false }
+      { name: 'applicationNumber', label: 'Application Number', type: 'text', required: false }
     ]
   },
   'non-indexed-publications': {
@@ -62,17 +60,16 @@ const moduleConfigs = {
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'type', label: 'Type', type: 'select', required: true, options: ['Journal', 'Conference'] },
       { name: 'authorPosition', label: 'Author Position', type: 'number', required: true },
-      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true },
-      { name: 'proofUrl', label: 'Proof URL', type: 'text', required: false }
+      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true }
     ]
   },
   'fci-scores': {
     title: 'FCI Score',
     apiEndpoint: '/fci-scores',
     fields: [
-      { name: 'courseCode', label: 'Course Code', type: 'text', required: true },
-      { name: 'courseName', label: 'Course Name', type: 'text', required: true },
-      { name: 'score', label: 'Score', type: 'number', required: true }
+      { name: 'averageScore', label: 'Average Score (0-10)', type: 'number', required: true },
+      { name: 'numberOfCourses', label: 'Number of Courses', type: 'number', required: true },
+      { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
   'ug-guidance': {
@@ -81,7 +78,6 @@ const moduleConfigs = {
     fields: [
       { name: 'studentName', label: 'Student Name', type: 'text', required: true },
       { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
-      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
       { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
     ]
   },
@@ -89,19 +85,18 @@ const moduleConfigs = {
     title: "Master's Research Guidance",
     apiEndpoint: '/masters-guidance',
     fields: [
-      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: false },
-      { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
+      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
+      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
+      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
     ]
   },
   'phd-guidance': {
     title: 'PhD Research Guidance',
     apiEndpoint: '/phd-guidance',
     fields: [
-      { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true },
-      { name: 'scholarName', label: 'Scholar Name', type: 'text', required: false },
-      { name: 'researchArea', label: 'Research Area', type: 'text', required: false },
-      { name: 'status', label: 'Status', type: 'select', required: true, options: ['Ongoing', 'Completed', 'Submitted'] }
+      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
+      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
+      { name: 'status', label: 'Status', type: 'select', required: false, options: ['Ongoing', 'Completed', 'Submitted'] }
     ]
   },
   'funded-projects': {
@@ -110,10 +105,9 @@ const moduleConfigs = {
     fields: [
       { name: 'title', label: 'Project Title', type: 'text', required: true },
       { name: 'fundingAmount', label: 'Funding Amount', type: 'number', required: true },
-      { name: 'category', label: 'Category', type: 'select', required: true, options: ['≥10 Lakhs','5-10 Lakhs','1-5 Lakhs','<1 Lakh'] },
+      { name: 'category', label: 'Category', type: 'select', required: true, options: ['≥10 Lakhs', '5-10 Lakhs', '1-5 Lakhs', '<1 Lakh'] },
       { name: 'fundingAgency', label: 'Funding Agency', type: 'text', required: false },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: false },
-      { name: 'endDate', label: 'End Date', type: 'date', required: false }
+      { name: 'startDate', label: 'Start Date', type: 'date', required: false }
     ]
   },
   'consulting-projects': {
@@ -130,7 +124,7 @@ const moduleConfigs = {
     title: 'Reviewer Roles',
     apiEndpoint: '/reviewer-roles',
     fields: [
-      { name: 'venue', label: 'Venue', type: 'text', required: true },
+      { name: 'venue', label: 'Venue (Journal/Conference)', type: 'text', required: true },
       { name: 'role', label: 'Role', type: 'text', required: true },
       { name: 'year', label: 'Year', type: 'number', required: true }
     ]
@@ -139,17 +133,18 @@ const moduleConfigs = {
     title: 'FDP/Events Organized',
     apiEndpoint: '/fdp-organized',
     fields: [
-      { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-      { name: 'role', label: 'Role', type: 'text', required: true },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: true }
+      { name: 'eventTitle', label: 'Event Title', type: 'text', required: true },
+      { name: 'durationCategory', label: 'Duration', type: 'select', required: true, options: ['5 Days', '3 Days', 'Other'] },
+      { name: 'startDate', label: 'Start Date', type: 'date', required: true },
+      { name: 'endDate', label: 'End Date', type: 'date', required: false }
     ]
   },
   'invited-talks': {
     title: 'Invited Talks',
     apiEndpoint: '/invited-talks',
     fields: [
-      { name: 'title', label: 'Title', type: 'text', required: true },
-      { name: 'venue', label: 'Venue', type: 'text', required: true },
+      { name: 'title', label: 'Talk Title', type: 'text', required: true },
+      { name: 'organization', label: 'Organization', type: 'text', required: true },
       { name: 'date', label: 'Date', type: 'date', required: true }
     ]
   },
@@ -157,8 +152,9 @@ const moduleConfigs = {
     title: 'Events Outside Institute',
     apiEndpoint: '/events-outside',
     fields: [
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['FDP', 'Seminar', 'Workshop', 'Conference'] },
       { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-      { name: 'organizer', label: 'Organizer', type: 'text', required: true },
+      { name: 'organization', label: 'Organization', type: 'text', required: false },
       { name: 'date', label: 'Date', type: 'date', required: true }
     ]
   },
@@ -166,8 +162,8 @@ const moduleConfigs = {
     title: 'Events Inside Institute',
     apiEndpoint: '/events-inside',
     fields: [
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['FDP', 'Seminar', 'Workshop', 'Conference', 'Meeting'] },
       { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-      { name: 'role', label: 'Role', type: 'text', required: true },
       { name: 'date', label: 'Date', type: 'date', required: true }
     ]
   },
@@ -175,8 +171,9 @@ const moduleConfigs = {
     title: 'Industry Relations',
     apiEndpoint: '/industry-relations',
     fields: [
-      { name: 'organization', label: 'Organization', type: 'text', required: true },
-      { name: 'type', label: 'Type', type: 'text', required: true },
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['MoU', 'Co-hosted Event', 'Technical Talk Series'] },
+      { name: 'companyName', label: 'Company Name', type: 'text', required: true },
+      { name: 'description', label: 'Description', type: 'textarea', required: false },
       { name: 'date', label: 'Date', type: 'date', required: true }
     ]
   },
@@ -184,9 +181,9 @@ const moduleConfigs = {
     title: 'Institutional Services',
     apiEndpoint: '/institutional-services',
     fields: [
+      { name: 'role', label: 'Role', type: 'select', required: true, options: ['Coordinator', 'Others'] },
       { name: 'serviceName', label: 'Service Name', type: 'text', required: true },
-      { name: 'role', label: 'Role', type: 'text', required: true },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: true }
+      { name: 'description', label: 'Description', type: 'textarea', required: false }
     ]
   },
   'other-services': {
@@ -201,7 +198,7 @@ const moduleConfigs = {
     title: 'Professionalism',
     apiEndpoint: '/professionalism',
     fields: [
-      { name: 'rating', label: 'Rating', type: 'number', required: true },
+      { name: 'rating', label: 'Rating (1-10)', type: 'number', required: true },
       { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
@@ -215,7 +212,6 @@ const moduleConfigs = {
   }
 };
 
-// Universal page component
 const UniversalModulePage = ({ moduleKey }) => {
   const config = moduleConfigs[moduleKey];
   
@@ -234,7 +230,6 @@ const UniversalModulePage = ({ moduleKey }) => {
   );
 };
 
-// Export individual page components
 export const ConferencePapersPageNew = () => <UniversalModulePage moduleKey="conference-papers" />;
 export const PatentsPageNew = () => <UniversalModulePage moduleKey="patents" />;
 export const AwardsPageNew = () => <UniversalModulePage moduleKey="awards" />;

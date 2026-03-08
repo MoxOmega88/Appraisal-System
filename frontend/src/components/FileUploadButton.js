@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Button, Box, Typography, Chip } from '@mui/material';
-import { CloudUpload as CloudUploadIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
+import { Button, Box, Typography, Chip, Stack } from '@mui/material';
+import { CloudUpload as CloudUploadIcon, CheckCircle as CheckCircleIcon, Close as CloseIcon } from '@mui/icons-material';
 
-const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png', label = 'Upload File' }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
+const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png', label = 'Upload Files', multiple = true }) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      onFileSelect(file);
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      onFileSelect(files);
     }
+  };
+
+  const handleRemoveFile = (index) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
+    onFileSelect(newFiles);
   };
 
   return (
@@ -20,6 +26,7 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
         style={{ display: 'none' }}
         id="file-upload-button"
         type="file"
+        multiple={multiple}
         onChange={handleFileChange}
       />
       <label htmlFor="file-upload-button">
@@ -43,26 +50,27 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
         </Button>
       </label>
       
-      {selectedFile && (
-        <Box mt={2} display="flex" alignItems="center" gap={1}>
-          <CheckCircleIcon color="success" />
-          <Chip
-            label={selectedFile.name}
-            color="success"
-            variant="outlined"
-            onDelete={() => {
-              setSelectedFile(null);
-              onFileSelect(null);
-            }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            ({(selectedFile.size / 1024).toFixed(2)} KB)
-          </Typography>
+      {selectedFiles.length > 0 && (
+        <Box mt={2}>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {selectedFiles.map((file, index) => (
+              <Chip
+                key={index}
+                icon={<CheckCircleIcon />}
+                label={`${file.name} (${(file.size / 1024).toFixed(2)} KB)`}
+                onDelete={() => handleRemoveFile(index)}
+                deleteIcon={<CloseIcon />}
+                color="success"
+                variant="outlined"
+                sx={{ mb: 1 }}
+              />
+            ))}
+          </Stack>
         </Box>
       )}
       
       <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-        Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)
+        Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB per file, up to 10 files)
       </Typography>
     </Box>
   );

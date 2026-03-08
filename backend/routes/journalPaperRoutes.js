@@ -1,7 +1,3 @@
-/**
- * Journal Paper Routes
- */
-
 const express = require('express');
 const router = express.Router();
 const createController = require('../controllers/genericController');
@@ -13,11 +9,11 @@ const controller = createController(JournalPaper, 'Journal Paper');
 
 router.route('/')
   .get(protect, controller.getAll)
-  .post(protect, upload.single('file'), controller.create);
+  .post(protect, upload.array('documents', 10), controller.create);
 
 router.route('/:id')
   .get(protect, controller.getById)
-  .put(protect, upload.single('file'), controller.update)
+  .put(protect, upload.array('documents', 10), controller.update)
   .delete(protect, controller.deleteRecord);
 
 module.exports = router;

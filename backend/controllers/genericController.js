@@ -1,14 +1,5 @@
-/**
- * Generic Controller Factory
- * Creates CRUD controllers for all appraisal modules
- */
-
-// Generic factory for creating CRUD operations
 const createController = (Model, modelName) => {
   return {
-    // @desc    Get all records for a term
-    // @route   GET /api/:resource?termId=xyz
-    // @access  Private
     getAll: async (req, res) => {
       try {
         const { termId } = req.query;
@@ -26,9 +17,6 @@ const createController = (Model, modelName) => {
       }
     },
 
-    // @desc    Get single record by ID
-    // @route   GET /api/:resource/:id
-    // @access  Private
     getById: async (req, res) => {
       try {
         const record = await Model.findById(req.params.id);
@@ -37,7 +25,6 @@ const createController = (Model, modelName) => {
           return res.status(404).json({ message: `${modelName} not found` });
         }
 
-        // Verify ownership
         if (record.facultyId.toString() !== req.user._id.toString()) {
           return res.status(403).json({ message: 'Not authorized to access this record' });
         }
@@ -49,9 +36,6 @@ const createController = (Model, modelName) => {
       }
     },
 
-    // @desc    Create new record
-    // @route   POST /api/:resource
-    // @access  Private
     create: async (req, res) => {
       try {
         const recordData = {
@@ -59,41 +43,22 @@ const createController = (Model, modelName) => {
           facultyId: req.user._id
         };
 
-        // ensure termId is propagated from query/body/params when available
-        if (!recordData.termId) {
-          if (req.body.termId) recordData.termId = req.body.termId;
-          else if (req.query.termId) recordData.termId = req.query.termId;
-          else if (req.params.termId) recordData.termId = req.params.termId;
-        }
-
-        // Add file path if file was uploaded
-        if (req.file) {
-          // Get the relative path from uploads folder
-          const relativePath = req.file.path.split('uploads')[1].replace(/\\/g, '/');
-          recordData.filePath = `/uploads${relativePath}`;
-        }
-
-        // Add proof URL only for configured modules (backward compatibility)
-        try {
-          const proofConfig = require('../config/proofConfig');
-          if (req.file && proofConfig.has(modelName)) {
-            recordData.proofUrl = `/uploads/proofs/${req.file.filename}`;
-          }
-        } catch (e) {
-          // If config missing, fall back to previous behavior (safe: do not add)
+        if (req.files && req.files.length > 0) {
+          recordData.documents = req.files.map(file => {
+            // Extract relative path from uploads folder
+            const relativePath = file.path.split('uploads')[1].replace(/\\/g, '/');
+            return {
+              fileName: file.filename,
+              filePath: `/uploads${relativePath}`,
+              originalName: file.originalname
+            };
+          });
         }
 
         const record = await Model.create(recordData);
         res.status(201).json(record);
       } catch (error) {
         console.error(`Create ${modelName} error:`, error);
-        if (error.name === 'ValidationError') {
-          const msgs = Object.values(error.errors).map(e => e.message).join(', ');
-          return res.status(400).json({
-            message: `Validation failed: ${msgs}`,
-            error: error.message
-          });
-        }
         res.status(400).json({ 
           message: `Error creating ${modelName}`, 
           error: error.message 
@@ -101,9 +66,6 @@ const createController = (Model, modelName) => {
       }
     },
 
-    // @desc    Update record
-    // @route   PUT /api/:resource/:id
-    // @access  Private
     update: async (req, res) => {
       try {
         const record = await Model.findById(req.params.id);
@@ -112,35 +74,23 @@ const createController = (Model, modelName) => {
           return res.status(404).json({ message: `${modelName} not found` });
         }
 
-        // Verify ownership
         if (record.facultyId.toString() !== req.user._id.toString()) {
           return res.status(403).json({ message: 'Not authorized to update this record' });
         }
 
-        const updateData = { ...req.body };
+        const updateData = req.body;
 
-        // ensure termId is preserved if sent via query/params
-        if (!updateData.termId) {
-          if (req.body.termId) updateData.termId = req.body.termId;
-          else if (req.query.termId) updateData.termId = req.query.termId;
-          else if (req.params.termId) updateData.termId = req.params.termId;
-        }
-
-        // Add file path if file was uploaded
-        if (req.file) {
-          // Get the relative path from uploads folder
-          const relativePath = req.file.path.split('uploads')[1].replace(/\\/g, '/');
-          updateData.filePath = `/uploads${relativePath}`;
-        }
-
-        // Add proof URL only for configured modules (backward compatibility)
-        try {
-          const proofConfig = require('../config/proofConfig');
-          if (req.file && proofConfig.has(modelName)) {
-            updateData.proofUrl = `/uploads/proofs/${req.file.filename}`;
-          }
-        } catch (e) {
-          // ignore
+        if (req.files && req.files.length > 0) {
+          const newDocuments = req.files.map(file => {
+            // Extract relative path from uploads folder
+            const relativePath = file.path.split('uploads')[1].replace(/\\/g, '/');
+            return {
+              fileName: file.filename,
+              filePath: `/uploads${relativePath}`,
+              originalName: file.originalname
+            };
+          });
+          updateData.documents = [...(record.documents || []), ...newDocuments];
         }
 
         const updatedRecord = await Model.findByIdAndUpdate(
@@ -152,20 +102,10 @@ const createController = (Model, modelName) => {
         res.json(updatedRecord);
       } catch (error) {
         console.error(`Update ${modelName} error:`, error);
-        if (error.name === 'ValidationError') {
-          const msgs = Object.values(error.errors).map(e => e.message).join(', ');
-          return res.status(400).json({
-            message: `Validation failed: ${msgs}`,
-            error: error.message
-          });
-        }
         res.status(400).json({ message: `Error updating ${modelName}`, error: error.message });
       }
     },
 
-    // @desc    Delete record
-    // @route   DELETE /api/:resource/:id
-    // @access  Private
     deleteRecord: async (req, res) => {
       try {
         const record = await Model.findById(req.params.id);
@@ -174,7 +114,6 @@ const createController = (Model, modelName) => {
           return res.status(404).json({ message: `${modelName} not found` });
         }
 
-        // Verify ownership
         if (record.facultyId.toString() !== req.user._id.toString()) {
           return res.status(403).json({ message: 'Not authorized to delete this record' });
         }

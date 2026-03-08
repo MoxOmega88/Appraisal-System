@@ -21,7 +21,17 @@ const otherContributionSchema = new mongoose.Schema({
     required: [true, 'Description is required'],
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
-  }
+  },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
 }, {
   timestamps: true
 });

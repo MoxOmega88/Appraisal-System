@@ -48,7 +48,17 @@ const conferencePaperSchema = new mongoose.Schema({
   filePath: {
     type: String,
     default: null
-  }
+  },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
 }, {
   timestamps: true
 });

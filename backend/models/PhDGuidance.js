@@ -34,6 +34,16 @@ const phdGuidanceSchema = new mongoose.Schema({
     enum: ['Ongoing', 'Completed', 'Submitted'],
     default: 'Ongoing'
   },
+  documents: [{
+    fileName: String,
+    filePath: String,
+    originalName: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+
   
 }, {
   timestamps: true

@@ -2,7 +2,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Category folder mapping
 const categoryFolders = {
   'fci-scores': '01_FCI_Score',
   'journal-papers': '02_Journal_Papers',
@@ -29,14 +28,12 @@ const categoryFolders = {
   'other-contributions': '23_Other_Contributions'
 };
 
-// Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const category = req.baseUrl.split('/').pop(); // Extract category from route
+    const category = req.baseUrl.split('/').pop();
     const folderName = categoryFolders[category] || 'misc';
     const uploadPath = path.join(__dirname, '../uploads', folderName);
     
-    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
@@ -49,23 +46,19 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter - only allow PDF, DOC, DOCX, images
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /pdf|doc|docx|jpg|jpeg|png/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
   
-  if (mimetype && extname) {
+  if (allowedTypes.includes(file.mimetype)) {
     return cb(null, true);
   } else {
-    cb(new Error('Only PDF, DOC, DOCX, and image files are allowed!'));
+    cb(new Error('Only PDF, JPG, JPEG, and PNG files are allowed!'));
   }
 };
 
-// Multer upload configuration
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // Increased to 50MB
   fileFilter: fileFilter
 });
 

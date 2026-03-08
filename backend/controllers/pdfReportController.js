@@ -1,6 +1,5 @@
 const PDFDocument = require('pdfkit');
 
-// Import all models
 const User = require('../models/User');
 const Term = require('../models/Term');
 const FCIScore = require('../models/FCIScore');
@@ -27,16 +26,11 @@ const Award = require('../models/Award');
 const Professionalism = require('../models/Professionalism');
 const OtherContribution = require('../models/OtherContribution');
 
-/**
- * Generate Professional PDF Report
- * GET /api/generate-pdf-report/:termId
- */
 exports.generatePDFReport = async (req, res) => {
   try {
     const { termId } = req.params;
     const facultyId = req.user.id;
     
-    // Fetch faculty and term data
     const faculty = await User.findById(facultyId);
     const term = await Term.findById(termId);
     
@@ -44,7 +38,6 @@ exports.generatePDFReport = async (req, res) => {
       return res.status(404).json({ message: 'Term not found' });
     }
     
-    // Fetch all appraisal data
     const appraisalData = {
       fciScores: await FCIScore.find({ facultyId, termId }),
       journalPapers: await JournalPaper.find({ facultyId, termId }),
@@ -71,15 +64,12 @@ exports.generatePDFReport = async (req, res) => {
       otherContributions: await OtherContribution.find({ facultyId, termId })
     };
     
-    // Create PDF
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
     
-    // Set response headers
     const pdfFileName = `${faculty.name.replace(/\s+/g, '_')}_${term.termName.replace(/\s+/g, '_')}_Report.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${pdfFileName}"`);
     
-    // Pipe PDF to response
     doc.pipe(res);
     
     // Header
@@ -94,17 +84,13 @@ exports.generatePDFReport = async (req, res) => {
     doc.text(`Term: ${term.termName} (${term.academicYear})`);
     doc.moveDown(1.5);
     
-    // Table configuration
-    const tableTop = doc.y;
     const colWidths = [30, 280, 200, 40];
-    const rowHeight = 20;
     
-    // Draw table header
     const drawTableHeader = (y) => {
-      doc.rect(40, y, colWidths[0], rowHeight).stroke();
-      doc.rect(70, y, colWidths[1], rowHeight).stroke();
-      doc.rect(350, y, colWidths[2], rowHeight).stroke();
-      doc.rect(550, y, colWidths[3], rowHeight).stroke();
+      doc.rect(40, y, colWidths[0], 20).stroke();
+      doc.rect(70, y, colWidths[1], 20).stroke();
+      doc.rect(350, y, colWidths[2], 20).stroke();
+      doc.rect(550, y, colWidths[3], 20).stroke();
       
       doc.fontSize(9).font('Helvetica-Bold');
       doc.text('Sl', 45, y + 6, { width: colWidths[0] - 10, align: 'center' });
@@ -113,10 +99,10 @@ exports.generatePDFReport = async (req, res) => {
       doc.text('App', 555, y + 6, { width: colWidths[3] - 10, align: 'center' });
     };
     
-    drawTableHeader(tableTop);
-    let currentY = tableTop + rowHeight;
+    let currentY = doc.y;
+    drawTableHeader(currentY);
+    currentY += 20;
     
-    // Categories with their data
     const categories = [
       { num: 1, title: 'FCI Score (Average of all courses handled)', key: 'fciScores', field: 'score' },
       { num: 2, title: 'No. of new paid refereed journal papers in SJR*', key: 'journalPapers', field: 'title' },
@@ -128,8 +114,8 @@ exports.generatePDFReport = async (req, res) => {
       { num: 8, title: 'Research Guidance UG', key: 'ugGuidance', field: 'studentName' },
       { num: 9, title: 'Research Guidance PG', key: 'mastersGuidance', field: 'studentName' },
       { num: 10, title: 'Research Guidance PhD', key: 'phdGuidance', field: 'studentName' },
-      { num: 11, title: 'Funded Projects*', key: 'fundedProjects', field: 'projectTitle' },
-      { num: 12, title: 'Consulting Projects*', key: 'consultingProjects', field: 'projectTitle' },
+      { num: 11, title: 'Funded Projects*', key: 'fundedProjects', field: 'title' },
+      { num: 12, title: 'Consulting Projects*', key: 'consultingProjects', field: 'title' },
       { num: 13, title: 'No. of Conference Chair, Session Chair, Reviewer of Q1 or Q2 Journal', key: 'reviewerRoles', field: 'venue' },
       { num: 14, title: 'No. of FDP/ Seminar/ Workshop organized as co-ordinator', key: 'fdpOrganized', field: 'eventName' },
       { num: 15, title: 'No. of invited technical talks outside the institute', key: 'invitedTalks', field: 'title' },
@@ -146,45 +132,58 @@ exports.generatePDFReport = async (req, res) => {
     categories.forEach((category) => {
       const data = appraisalData[category.key] || [];
       const hasData = data.length > 0;
-      const detailedInfo = hasData ? data.map((item, idx) => `${idx + 1}. ${item[category.field] || 'N/A'}`).join('\n') : 'NA';
-      const appendix = hasData && data.some(item => item.filePath) ? 'Y' : 'NA';
       
-      // Check if we need a new page
-      const estimatedHeight = Math.max(rowHeight, Math.ceil(detailedInfo.length / 50) * 15);
-      if (currentY + estimatedHeight > 750) {
+      let detailedInfo = 'NA';
+      if (hasData) {
+        detailedInfo = data.map((item, idx) => {
+          const value = item[category.field];
+          if (value !== undefined && value !== null && value !== '') {
+            return `${idx + 1}. ${value}`;
+          }
+          return `${idx + 1}. (Entry ${idx + 1})`;
+        }).join(', ');
+      }
+      
+      const appendix = hasData && data.some(item => item.documents && item.documents.length > 0) ? 'Y' : 'NA';
+      
+      // Calculate dynamic height based on content
+      const lines = doc.heightOfString(detailedInfo, { width: colWidths[2] - 10 });
+      const categoryLines = doc.heightOfString(category.title, { width: colWidths[1] - 10 });
+      const rowHeight = Math.max(20, Math.ceil(Math.max(lines, categoryLines)) + 10);
+      
+      if (currentY + rowHeight > 750) {
         doc.addPage();
         currentY = 40;
         drawTableHeader(currentY);
-        currentY += rowHeight;
+        currentY += 20;
       }
       
       const startY = currentY;
       
-      // Draw cells
-      doc.rect(40, startY, colWidths[0], estimatedHeight).stroke();
-      doc.rect(70, startY, colWidths[1], estimatedHeight).stroke();
-      doc.rect(350, startY, colWidths[2], estimatedHeight).stroke();
-      doc.rect(550, startY, colWidths[3], estimatedHeight).stroke();
+      doc.rect(40, startY, colWidths[0], rowHeight).stroke();
+      doc.rect(70, startY, colWidths[1], rowHeight).stroke();
+      doc.rect(350, startY, colWidths[2], rowHeight).stroke();
+      doc.rect(550, startY, colWidths[3], rowHeight).stroke();
       
-      // Fill content
       doc.fontSize(8).font('Helvetica');
       doc.text(category.num.toString(), 45, startY + 5, { width: colWidths[0] - 10, align: 'center' });
       doc.text(category.title, 75, startY + 5, { width: colWidths[1] - 10 });
       doc.text(detailedInfo, 355, startY + 5, { width: colWidths[2] - 10 });
       doc.text(appendix, 555, startY + 5, { width: colWidths[3] - 10, align: 'center' });
       
-      currentY += estimatedHeight;
+      currentY += rowHeight;
     });
     
-    // Finalize PDF
     doc.end();
     
   } catch (error) {
     console.error('Error generating PDF report:', error);
-    res.status(500).json({ 
-      message: 'Error generating PDF report', 
-      error: error.message 
-    });
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        message: 'Error generating PDF report', 
+        error: error.message 
+      });
+    }
   }
 };
 
