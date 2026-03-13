@@ -38,11 +38,24 @@ export default function ProfessionalActivitiesPage() {
           description=""
           service={reviewerRoleService}
           columns={[
-            { field: 'roleType', header: 'Role Type' },
-            { field: 'venueName', header: 'Venue Name' },
-            { field: 'year', header: 'Year' },
+            { field: 'roleType', header: 'Role Type', render: (val) => val || 'N/A' },
+            { field: 'venueName', header: 'Venue Name', render: (val) => val || 'N/A' },
+            { field: 'year', header: 'Year', render: (val) => val || 'N/A' },
             { field: 'isQ1Q2Reviewer', header: 'Q1/Q2 Reviewer', render: (val) => val ? <Chip label="Yes" color="success" size="small" /> : <Chip label="No" size="small" /> },
-            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
+            { 
+              field: 'documents', 
+              header: 'Proof', 
+              render: (val) => {
+                if (val && val.length > 0) {
+                  return (
+                    <a href={`http://localhost:5000${val[0].filePath}`} target="_blank" rel="noopener noreferrer">
+                      View File
+                    </a>
+                  );
+                }
+                return 'No proof';
+              }
+            },
           ]}
           formFields={[
             { name: 'roleType', label: 'Role Type', type: 'select', required: true, options: ['Conference Chair', 'Session Chair', 'Reviewer'] },

@@ -38,10 +38,23 @@ export default function ResearchGuidancePage() {
           description=""
           service={ugGuidanceService}
           columns={[
-            { field: 'numberOfStudents', header: 'Number of Students' },
-            { field: 'projectTitle', header: 'Project Title' },
-            { field: 'remarks', header: 'Remarks' },
-            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
+            { field: 'numberOfStudents', header: 'Number of Students', render: (val) => val !== undefined && val !== null ? val : 'N/A' },
+            { field: 'projectTitle', header: 'Project Title', render: (val) => val || 'N/A' },
+            { field: 'remarks', header: 'Remarks', render: (val) => val || 'N/A' },
+            { 
+              field: 'documents', 
+              header: 'Proof', 
+              render: (val) => {
+                if (val && val.length > 0) {
+                  return (
+                    <a href={`http://localhost:5000${val[0].filePath}`} target="_blank" rel="noopener noreferrer">
+                      View File
+                    </a>
+                  );
+                }
+                return 'No proof';
+              }
+            },
           ]}
           formFields={[
             { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true, inputProps: { min: 0 } },
@@ -59,10 +72,23 @@ export default function ResearchGuidancePage() {
           description=""
           service={mastersGuidanceService}
           columns={[
-            { field: 'numberOfStudents', header: 'Number of Students' },
-            { field: 'thesisTitle', header: 'Thesis Title' },
-            { field: 'remarks', header: 'Remarks' },
-            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
+            { field: 'numberOfStudents', header: 'Number of Students', render: (val) => val !== undefined && val !== null ? val : 'N/A' },
+            { field: 'thesisTitle', header: 'Thesis Title', render: (val) => val || 'N/A' },
+            { field: 'remarks', header: 'Remarks', render: (val) => val || 'N/A' },
+            { 
+              field: 'documents', 
+              header: 'Proof', 
+              render: (val) => {
+                if (val && val.length > 0) {
+                  return (
+                    <a href={`http://localhost:5000${val[0].filePath}`} target="_blank" rel="noopener noreferrer">
+                      View File
+                    </a>
+                  );
+                }
+                return 'No proof';
+              }
+            },
           ]}
           formFields={[
             { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true, inputProps: { min: 0 } },
@@ -80,11 +106,24 @@ export default function ResearchGuidancePage() {
           description=""
           service={phdGuidanceService}
           columns={[
-            { field: 'numberOfScholars', header: 'Number of Scholars' },
-            { field: 'scholarName', header: 'Scholar Name' },
-            { field: 'researchArea', header: 'Research Area' },
-            { field: 'status', header: 'Status' },
-            { field: 'proofUrl', header: 'Proof', render: (val) => val ? <a href={val} target="_blank" rel="noopener noreferrer">View PDF</a> : 'No proof' },
+            { field: 'numberOfScholars', header: 'Number of Scholars', render: (val) => val !== undefined && val !== null ? val : 'N/A' },
+            { field: 'scholarName', header: 'Scholar Name', render: (val) => val || 'N/A' },
+            { field: 'researchArea', header: 'Research Area', render: (val) => val || 'N/A' },
+            { field: 'status', header: 'Status', render: (val) => val || 'N/A' },
+            { 
+              field: 'documents', 
+              header: 'Proof', 
+              render: (val) => {
+                if (val && val.length > 0) {
+                  return (
+                    <a href={`http://localhost:5000${val[0].filePath}`} target="_blank" rel="noopener noreferrer">
+                      View File
+                    </a>
+                  );
+                }
+                return 'No proof';
+              }
+            },
           ]}
           formFields={[
             { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true, inputProps: { min: 0 } },

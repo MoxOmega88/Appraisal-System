@@ -193,13 +193,13 @@ const GenericCRUDPageWithUpload = ({
           margin="normal"
           label={field.label}
           name={field.name}
-          value={currentItem[field.name] || ''}
+          value={currentItem[field.name] !== undefined ? currentItem[field.name] : ''}
           onChange={handleChange}
           required={field.required}
         >
-          {field.options.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
+          {field.options && field.options.map((option) => (
+            <MenuItem key={String(option)} value={option}>
+              {typeof option === 'boolean' ? (option ? 'Yes' : 'No') : option}
             </MenuItem>
           ))}
         </TextField>

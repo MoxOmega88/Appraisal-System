@@ -1,6 +1,6 @@
 /**
- * Generic CRUD Page Component
- * Reusable component for all appraisal modules
+ * Generic CRUD Page Component - IMPROVED VERSION
+ * With SweetAlert2 integration and better validation
  */
 
 import React, { useState, useEffect } from 'react';
@@ -31,6 +31,7 @@ export default function GenericCRUDPage({
   const [currentItem, setCurrentItem] = useState(initialFormData);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchTerms();
@@ -41,6 +42,90 @@ export default function GenericCRUDPage({
       fetchItems();
     }
   }, [selectedTerm]);
+
+  const fetchTerms = async () => {
+    try {
+      const response = await termService.getAll();
+      const termsData = response.data || response;
+      setTerms(termsData);
+      if (termsData.length > 0) {
+        setSelectedTerm(termsData[0]._id);
+      }
+    } catch (error) {
+      console.error('Failed to fetch terms:', error);
+    }
+  };
+
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const response = await service.getAll(selectedTerm);
+      const itemsData = response.data || response;
+      setItems(itemsData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validateForm = () => {
+    for (const field of formFields) {
+      if (field.required) {
+        const value = currentItem[field.name];
+        
+        if (field.type === 'file') {
+          if (editMode && currentItem.documents && currentItem.documents.length > 0) {
+            continue;
+          }
+          if (!value) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: `${field.label} is required`
+            });
+            return false;
+          }
+        } else if (!value || (typeof value === 'string' && value.trim() === '')) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: `${field.label} is required`
+          });
+          return false;
+        }
+      }
+    }
+
+    if (currentItem.numberOfStudents !== undefined && currentItem.numberOfStudents < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Number of students cannot be negative'
+      });
+      return false;
+    }
+
+    if (currentItem.numberOfScholars !== undefined && currentItem.numberOfScholars < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Number of scholars cannot be negative'
+      });
+      return false;
+    }
+
+    if (currentItem.rating !== undefined && (currentItem.rating < 1 || currentItem.rating > 5)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Rating must be between 1 and 5'
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   const validateFile = (file) => {
     if (!file) return true;
@@ -55,12 +140,12 @@ export default function GenericCRUDPage({
       return false;
     }
 
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       Swal.fire({
         icon: 'error',
         title: 'File Too Large',
-        text: 'File size must be less than 10MB'
+        text: 'File size must be less than 50MB'
       });
       return false;
     }
@@ -68,104 +153,37 @@ export default function GenericCRUDPage({
     return true;
   };
 
-  const validateForm = () => {
-    for (const field of formFields) {
-      if (field.required) {
-        const value = currentItem[field.name];
-
-        if (field.type === 'file') {
-          if (editMode && currentItem.documents && currentItem.documents.length > 0) {
-            continue;
-          }
-
-          if (!value) {
-            Swal.fire({ icon: 'error', title: 'Validation Error', text: `${field.label} is required` });
-            return false;
-          }
-
-          if (!validateFile(value)) {
-            return false;
-          }
-        } else if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
-          Swal.fire({ icon: 'error', title: 'Validation Error', text: `${field.label} is required` });
-          return false;
-        }
-      }
-    }
-
-    if (currentItem.numberOfStudents !== undefined && Number(currentItem.numberOfStudents) < 0) {
-      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Number of students must be >= 0' });
-      return false;
-    }
-
-    if (currentItem.numberOfScholars !== undefined && Number(currentItem.numberOfScholars) < 0) {
-      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Number of scholars must be >= 0' });
-      return false;
-    }
-
-    return true;
-  };
-
-  const fetchTerms = async () => {
-    try {
-      const response = await termService.getAll();
-      setTerms(response.data);
-      if (response.data.length > 0) {
-        setSelectedTerm(response.data[0]._id);
-      }
-    } catch (error) {
-      setError('Failed to fetch terms');
-    }
-  };
-
-  const fetchItems = async () => {
-    try {
-      const response = await service.getAll(selectedTerm);
-      setItems(response.data);
-    } catch (error) {
-      setError('Failed to fetch data');
-    }
-  };
-
   const handleCreate = async () => {
     if (!validateForm()) return;
 
     try {
-      // Check if any file fields exist and service allows proofs
+      setLoading(true);
       const hasFileField = (service && service.proofAllowed) && formFields.some(f => f.type === 'file');
-      
       let dataToSend = { ...currentItem, termId: selectedTerm };
       
       if (hasFileField) {
         const formData = new FormData();
-        
-        // Add all form fields to FormData
         Object.keys(currentItem).forEach(key => {
-          const value = currentItem[key];
-
-          if (value instanceof File) {
-            if (validateFile(value)) {
-              formData.append(key, value);
+          if (currentItem[key] instanceof File) {
+            if (validateFile(currentItem[key])) {
+              formData.append(key, currentItem[key]);
             }
-          } else if (value !== undefined && value !== null) {
-            // Include 0 and empty strings for proper validation on backend
-            // Only exclude undefined and null
-            formData.append(key, value);
+          } else if (currentItem[key] !== undefined && currentItem[key] !== null) {
+            // Include 0 and empty strings - backend will validate
+            formData.append(key, currentItem[key]);
           }
         });
-        
         formData.append('termId', selectedTerm);
         dataToSend = formData;
       }
       
       await service.create(dataToSend);
-      setSuccess('Record created successfully');
       fetchItems();
       handleClose();
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Failed to create record';
-      Swal.fire({ icon: 'error', title: 'Error', text: message });
-      setError(message);
+      console.error('Create error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -173,51 +191,60 @@ export default function GenericCRUDPage({
     if (!validateForm()) return;
 
     try {
-      // Check if any file fields exist and service allows proofs
+      setLoading(true);
       const hasFileField = (service && service.proofAllowed) && formFields.some(f => f.type === 'file');
-      
       let dataToSend = { ...currentItem };
+      delete dataToSend._id;
+      delete dataToSend.createdAt;
+      delete dataToSend.updatedAt;
+      delete dataToSend.facultyId;
+      delete dataToSend.termId;
       
       if (hasFileField) {
         const formData = new FormData();
-        
-        // Add all form fields to FormData
-        Object.keys(currentItem).forEach(key => {
-          const value = currentItem[key];
-
-          if (value instanceof File) {
-            if (validateFile(value)) {
-              formData.append(key, value);
+        Object.keys(dataToSend).forEach(key => {
+          if (dataToSend[key] instanceof File) {
+            if (validateFile(dataToSend[key])) {
+              formData.append(key, dataToSend[key]);
             }
-          } else if (value !== undefined && value !== null) {
-            // Include 0 and empty strings for proper validation on backend
-            // Only exclude undefined and null
-            formData.append(key, value);
+          } else if (dataToSend[key] !== undefined && dataToSend[key] !== null && key !== 'documents') {
+            // Include 0 and empty strings - backend will validate
+            formData.append(key, dataToSend[key]);
           }
         });
-        
         dataToSend = formData;
       }
       
       await service.update(currentItem._id, dataToSend);
-      setSuccess('Record updated successfully');
       fetchItems();
       handleClose();
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Failed to update record';
-      Swal.fire({ icon: 'error', title: 'Error', text: message });
-      setError(message);
+      console.error('Update error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this record?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d32f2f',
+      cancelButtonColor: '#1976d2',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
       try {
+        setLoading(true);
         await service.delete(id);
-        setSuccess('Record deleted successfully');
         fetchItems();
       } catch (error) {
-        setError('Failed to delete record');
+        console.error('Delete error:', error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -250,13 +277,13 @@ export default function GenericCRUDPage({
         <FormControl fullWidth key={field.name}>
           <InputLabel>{field.label}</InputLabel>
           <Select
-            value={currentItem[field.name] !== undefined ? currentItem[field.name] : ''}
+            value={currentItem[field.name] || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             label={field.label}
             required={field.required}
           >
             {field.options.map((option) => (
-              <MenuItem key={String(option)} value={option}>
+              <MenuItem key={option} value={option}>
                 {typeof option === 'boolean' ? (option ? 'Yes' : 'No') : option}
               </MenuItem>
             ))}
@@ -273,23 +300,24 @@ export default function GenericCRUDPage({
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={(e) => {
               const file = e.target.files[0];
-              if (file) {
-                if (validateFile(file)) {
-                  handleFieldChange(field.name, file);
-                } else {
-                  e.target.value = '';
-                }
+              if (file && validateFile(file)) {
+                handleFieldChange(field.name, file);
               }
             }}
-            required={field.required}
+            required={field.required && !editMode}
             style={{ display: 'block', marginBottom: '8px' }}
           />
           <Typography variant="caption" color="text.secondary">
-            {field.label} (PDF, JPG, JPEG, PNG only, Max 10MB)
+            {field.label} (PDF, JPG, PNG - Max 50MB)
           </Typography>
           {currentItem[field.name] && currentItem[field.name].name && (
-            <Typography variant="caption" color="success.main">
+            <Typography variant="caption" color="success.main" display="block">
               ✓ {currentItem[field.name].name}
+            </Typography>
+          )}
+          {editMode && currentItem.documents && currentItem.documents.length > 0 && (
+            <Typography variant="caption" color="info.main" display="block">
+              📎 {currentItem.documents.length} file(s) uploaded
             </Typography>
           )}
         </Box>
@@ -322,9 +350,6 @@ export default function GenericCRUDPage({
         {description}
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}
-
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={6}>
@@ -348,7 +373,7 @@ export default function GenericCRUDPage({
               variant="contained"
               startIcon={<Add />}
               onClick={() => setOpen(true)}
-              disabled={!selectedTerm}
+              disabled={!selectedTerm || loading}
               fullWidth
             >
               Add New Record
@@ -370,24 +395,31 @@ export default function GenericCRUDPage({
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((item) => (
-              <TableRow key={item._id} hover>
-                {columns.map((col) => (
-                  <TableCell key={col.field}>
-                    {col.render ? col.render(item[col.field], item) : item[col.field]}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <IconButton onClick={() => handleEdit(item)} color="primary" size="small">
-                    <Edit />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(item._id)} color="error" size="small">
-                    <Delete />
-                  </IconButton>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length + 1} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">Loading...</Typography>
                 </TableCell>
               </TableRow>
-            ))}
-            {items.length === 0 && (
+            ) : items.length > 0 ? (
+              items.map((item) => (
+                <TableRow key={item._id} hover>
+                  {columns.map((col) => (
+                    <TableCell key={col.field}>
+                      {col.render ? col.render(item[col.field], item) : item[col.field]}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <IconButton onClick={() => handleEdit(item)} color="primary" size="small">
+                      <Edit />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(item._id)} color="error" size="small">
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
                 <TableCell colSpan={columns.length + 1} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">
@@ -414,9 +446,13 @@ export default function GenericCRUDPage({
           </Grid>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={editMode ? handleUpdate : handleCreate} variant="contained">
-            {editMode ? 'Update' : 'Create'}
+          <Button onClick={handleClose} disabled={loading}>Cancel</Button>
+          <Button 
+            onClick={editMode ? handleUpdate : handleCreate} 
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : (editMode ? 'Update' : 'Create')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -76,27 +76,28 @@ const moduleConfigs = {
     title: 'UG Research Guidance',
     apiEndpoint: '/ug-guidance',
     fields: [
-      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
-      { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
-      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
+      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
+      { name: 'projectTitle', label: 'Project Title', type: 'text', required: false },
+      { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
   'masters-guidance': {
     title: "Master's Research Guidance",
     apiEndpoint: '/masters-guidance',
     fields: [
-      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
-      { name: 'completionDate', label: 'Completion Date', type: 'date', required: false }
+      { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
+      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: false },
+      { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
   'phd-guidance': {
     title: 'PhD Research Guidance',
     apiEndpoint: '/phd-guidance',
     fields: [
-      { name: 'studentName', label: 'Student Name', type: 'text', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
-      { name: 'status', label: 'Status', type: 'select', required: false, options: ['Ongoing', 'Completed', 'Submitted'] }
+      { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true },
+      { name: 'scholarName', label: 'Scholar Name', type: 'text', required: false },
+      { name: 'researchArea', label: 'Research Area', type: 'text', required: false },
+      { name: 'status', label: 'Status', type: 'select', required: true, options: ['Ongoing', 'Completed', 'Submitted'] }
     ]
   },
   'funded-projects': {
@@ -124,9 +125,10 @@ const moduleConfigs = {
     title: 'Reviewer Roles',
     apiEndpoint: '/reviewer-roles',
     fields: [
-      { name: 'venue', label: 'Venue (Journal/Conference)', type: 'text', required: true },
-      { name: 'role', label: 'Role', type: 'text', required: true },
-      { name: 'year', label: 'Year', type: 'number', required: true }
+      { name: 'roleType', label: 'Role Type', type: 'select', required: true, options: ['Conference Chair', 'Session Chair', 'Reviewer'] },
+      { name: 'venueName', label: 'Venue Name (Journal/Conference)', type: 'text', required: false },
+      { name: 'year', label: 'Year', type: 'number', required: false },
+      { name: 'isQ1Q2Reviewer', label: 'Q1/Q2 Journal Reviewer', type: 'select', required: false, options: [false, true] }
     ]
   },
   'fdp-organized': {
