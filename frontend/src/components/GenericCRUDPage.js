@@ -109,9 +109,10 @@ export default function GenericCRUDPage({
   const fetchTerms = async () => {
     try {
       const response = await termService.getAll();
-      setTerms(response.data);
-      if (response.data.length > 0) {
-        setSelectedTerm(response.data[0]._id);
+      const termsData = response.data?.data || response.data || [];
+      setTerms(termsData);
+      if (termsData.length > 0) {
+        setSelectedTerm(termsData[0]._id);
       }
     } catch (error) {
       setError('Failed to fetch terms');
@@ -121,7 +122,8 @@ export default function GenericCRUDPage({
   const fetchItems = async () => {
     try {
       const response = await service.getAll(selectedTerm);
-      setItems(response.data);
+      const itemsData = response.data?.data || response.data || [];
+      setItems(itemsData);
     } catch (error) {
       setError('Failed to fetch data');
     }

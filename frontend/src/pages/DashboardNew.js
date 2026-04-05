@@ -92,7 +92,11 @@ const DashboardNew = () => {
       const results = await Promise.all(
         endpoints.map(endpoint => 
           axios.get(`/api${endpoint}?termId=${selectedTerm}`)
-            .then(res => res.data.length)
+            .then(res => {
+              // Handle both structured { success, data } and legacy array responses
+              const data = res.data?.data || res.data || [];
+              return Array.isArray(data) ? data.length : 0;
+            })
             .catch(() => 0)
         )
       );

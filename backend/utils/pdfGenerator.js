@@ -113,7 +113,7 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
             // Sl No
             doc.text((index + 1).toString(), 55, rowY, { width: colWidths.slNo - 10, align: 'center' });
 
-            // Details - format field names properly
+            // Details - format field names properly and show meaningful data
             const details = category.fields.map(field => {
               if (item[field] !== undefined && item[field] !== null && item[field] !== '') {
                 // Convert camelCase to readable format
@@ -143,7 +143,24 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
               return '';
             }).filter(Boolean).join(', ');
 
-            doc.text(details || 'Entry ' + (index + 1), 95, rowY, { width: colWidths.details - 10 });
+            // If no details found, try to show at least the first meaningful field
+            let displayText = details;
+            if (!displayText) {
+              // Try common field names
+              const fallbackFields = ['title', 'projectTitle', 'thesisTitle', 'eventTitle', 'eventName', 'description', 'serviceName'];
+              for (const field of fallbackFields) {
+                if (item[field]) {
+                  displayText = item[field];
+                  break;
+                }
+              }
+              // If still nothing, show Entry X as last resort
+              if (!displayText) {
+                displayText = `Entry ${index + 1}`;
+              }
+            }
+
+            doc.text(displayText, 95, rowY, { width: colWidths.details - 10 });
 
             // Appendix
             const hasAppendix = item.filePath ? 'Y' : 'NA';

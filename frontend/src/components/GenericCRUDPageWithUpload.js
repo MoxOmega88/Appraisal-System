@@ -68,9 +68,11 @@ const GenericCRUDPageWithUpload = ({
   const fetchTerms = async () => {
     try {
       const response = await termService.getAll();
-      setTerms(response.data);
-      if (response.data.length > 0) {
-        setSelectedTerm(response.data[0]._id);
+      // Handle both structured { success, data } and legacy array responses
+      const termsData = response.data?.data || response.data || [];
+      setTerms(termsData);
+      if (termsData.length > 0) {
+        setSelectedTerm(termsData[0]._id);
       }
     } catch (err) {
       setError('Failed to fetch terms');
@@ -82,7 +84,9 @@ const GenericCRUDPageWithUpload = ({
     try {
       const url = termRequired ? `/api${apiEndpoint}?termId=${selectedTerm}` : `/api${apiEndpoint}`;
       const response = await axios.get(url);
-      setData(response.data);
+      // Handle both structured { success, data } and legacy array responses
+      const itemsData = response.data?.data || response.data || [];
+      setData(itemsData);
     } catch (err) {
       setError('Failed to fetch data');
     } finally {
