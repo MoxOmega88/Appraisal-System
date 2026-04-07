@@ -133,15 +133,23 @@ exports.generatePDFReport = async (req, res) => {
       const data = appraisalData[category.key] || [];
       const hasData = data.length > 0;
       
+      const getDisplayValue = (item) => {
+        if (item.title) return item.title;
+        if (item.projectTitle) return item.projectTitle;
+        if (item.thesisTitle) return item.thesisTitle;
+        if (item.scholarName) return item.scholarName;
+        if (item.venueName) return item.venueName;
+        if (item.eventTitle) return item.eventTitle;
+        if (item.companyName) return item.companyName;
+        if (item.serviceName) return item.serviceName;
+        if (item.awardTitle) return item.awardTitle;
+        if (item.description) return item.description;
+        return 'N/A';
+      };
+      
       let detailedInfo = 'NA';
       if (hasData) {
-        detailedInfo = data.map((item, idx) => {
-          const value = item[category.field];
-          if (value !== undefined && value !== null && value !== '') {
-            return `${idx + 1}. ${value}`;
-          }
-          return `${idx + 1}. (Entry ${idx + 1})`;
-        }).join(', ');
+        detailedInfo = data.map((item, idx) => `${idx + 1}. ${getDisplayValue(item)}`).join(', ');
       }
       
       const appendix = hasData && data.some(item => item.documents && item.documents.length > 0) ? 'Y' : 'NA';

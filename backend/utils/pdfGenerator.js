@@ -146,18 +146,19 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
             // If no details found, try to show at least the first meaningful field
             let displayText = details;
             if (!displayText) {
-              // Try common field names
-              const fallbackFields = ['title', 'projectTitle', 'thesisTitle', 'eventTitle', 'eventName', 'description', 'serviceName'];
-              for (const field of fallbackFields) {
-                if (item[field]) {
-                  displayText = item[field];
-                  break;
-                }
-              }
-              // If still nothing, show Entry X as last resort
-              if (!displayText) {
-                displayText = `Entry ${index + 1}`;
-              }
+              // Priority-based fallback system for meaningful names
+              displayText = 
+                item.title ||
+                item.projectTitle ||
+                item.thesisTitle ||
+                item.scholarName ||
+                item.venueName ||
+                item.eventTitle ||
+                item.companyName ||
+                item.serviceName ||
+                item.awardTitle ||
+                item.description ||
+                `Entry ${index + 1}`;
             }
 
             doc.text(displayText, 95, rowY, { width: colWidths.details - 10 });
