@@ -57,6 +57,7 @@ const MODULE_CONFIG = [
 exports.generateZipOnly = async (req, res) => {
   try {
     const { termId } = req.params;
+    const { selectedFields } = req.body; // Array of selected module keys
     const facultyId = req.user.id;
     
     const faculty = await User.findById(facultyId);
@@ -65,6 +66,41 @@ exports.generateZipOnly = async (req, res) => {
     if (!term) {
       return res.status(404).json({ message: 'Term not found' });
     }
+
+    // Helper function to check if a module should be included
+    const shouldIncludeModule = (moduleKey) => {
+      if (!selectedFields || selectedFields.length === 0) {
+        return true; // Include all if no selection (Select All)
+      }
+      return selectedFields.includes(moduleKey);
+    };
+
+    // Map frontend keys to backend module names
+    const keyMapping = {
+      'fciScores': 'FCI_Score',
+      'journalPapers': 'Journal_Papers',
+      'conferencePapers': 'Conference_Papers',
+      'nonIndexedPublications': 'NonIndexed_Publications',
+      'books': 'Books_Chapters',
+      'disclosures': 'Disclosures',
+      'patents': 'Patents',
+      'ugGuidance': 'UG_Guidance',
+      'mastersGuidance': 'Masters_Guidance',
+      'phdGuidance': 'PhD_Guidance',
+      'fundedProjects': 'Funded_Projects',
+      'consultingProjects': 'Consulting_Projects',
+      'reviewerRoles': 'Reviewer_Roles',
+      'fdpOrganized': 'FDP_Organized',
+      'invitedTalks': 'Invited_Talks',
+      'eventsOutside': 'Events_Outside',
+      'eventsInside': 'Events_Inside',
+      'industryRelations': 'Industry_Relations',
+      'institutionalServices': 'Institutional_Services',
+      'otherServices': 'Other_Services',
+      'awards': 'Awards',
+      'professionalism': 'Professionalism',
+      'otherContributions': 'Other_Contributions'
+    };
     
     const archive = archiver('zip', { zlib: { level: 9 } });
     
@@ -82,6 +118,11 @@ exports.generateZipOnly = async (req, res) => {
     let totalFiles = 0;
     
     for (const config of MODULE_CONFIG) {
+      // Check if this module should be included based on selection
+      const frontendKey = Object.keys(keyMapping).find(key => keyMapping[key] === config.name);
+      if (!shouldIncludeModule(frontendKey)) {
+        continue; // Skip this module
+      }
       try {
         const records = await config.model.find({ facultyId, termId });
         console.log(`${config.name}: Found ${records.length} records`);

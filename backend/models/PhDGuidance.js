@@ -21,12 +21,15 @@ const phdGuidanceSchema = new mongoose.Schema({
     required: [true, 'Number of scholars is required'],
     min: 0
   },
-  scholarName: {
-    type: String,
-    trim: true
-  },
+  scholars: [{
+    name: {
+      type: String,
+      trim: true
+    }
+  }],
   researchArea: {
     type: String,
+    required: [true, 'Research area is required'],
     trim: true
   },
   status: {

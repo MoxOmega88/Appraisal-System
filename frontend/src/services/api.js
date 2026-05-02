@@ -49,7 +49,10 @@ axios.interceptors.response.use(
       icon: 'error',
       title: 'Error',
       text: errorMessage,
-      confirmButtonColor: '#1976d2'
+      confirmButtonColor: '#1976d2',
+      customClass: {
+        container: 'swal-high-zindex'
+      }
     });
 
     return Promise.reject(error);
@@ -124,16 +127,28 @@ export const finalReportService = {
     axios.get(`${API_BASE}/generate-final-report/${termId}`, { responseType: 'blob' })
 };
 
-// ZIP service (only files, no PDF)
+// ZIP service (only files, no PDF) - with module selection
 export const zipService = {
-  generate: (termId) => 
-    axios.get(`${API_BASE}/generate-zip/${termId}`, { responseType: 'blob' })
+  generate: (termId, selectedFields = []) => 
+    axios.post(`${API_BASE}/generate-zip/${termId}`, 
+      { selectedFields }, 
+      { responseType: 'blob' }
+    )
 };
 
 // PDF report service (only PDF, no files)
 export const pdfReportService = {
   generate: (termId) => 
     axios.get(`${API_BASE}/generate-pdf-report/${termId}`, { responseType: 'blob' })
+};
+
+// Data Summary service (comprehensive PDF with all database fields)
+export const dataSummaryService = {
+  generate: (termId, selectedFields = null) => 
+    axios.post(`${API_BASE}/generate-data-summary/${termId}`, 
+      { selectedFields }, 
+      { responseType: 'blob' }
+    )
 };
 
 // Default axios instance for direct API calls

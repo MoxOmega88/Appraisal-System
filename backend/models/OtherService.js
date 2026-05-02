@@ -16,9 +16,13 @@ const otherServiceSchema = new mongoose.Schema({
     ref: 'Term',
     required: true
   },
+  serviceName: {
+    type: String,
+    required: [true, 'Service name is required'],
+    trim: true
+  },
   description: {
     type: String,
-    required: [true, 'Description is required'],
     trim: true
   },
   date: {

@@ -41,6 +41,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const finalReportRoutes = require('./routes/finalReportRoutes');
 const zipRoutes = require('./routes/zipRoutes');
 const pdfReportRoutes = require('./routes/pdfReportRoutes');
+const dataSummaryRoutes = require('./routes/dataSummaryRoutes');
 
 // Initialize Express app
 const app = express();
@@ -58,7 +59,47 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB Connected Successfully'))
+.then(async () => {
+  console.log('✅ MongoDB Connected Successfully');
+  
+  // Fix Professionalism index to allow multiple entries per term (silent)
+  try {
+    const db = mongoose.connection.db;
+    const collection = db.collection('professionalisms');
+    
+    // Get all existing indexes
+    const indexes = await collection.indexes();
+    
+    // Drop all unique indexes
+    for (const index of indexes) {
+      if (index.name !== '_id_' && index.unique) {
+        try {
+          await collection.dropIndex(index.name);
+        } catch (err) {
+          // Silent
+        }
+      }
+    }
+    
+    // Drop specific problematic indexes by name
+    const indexesToDrop = ['facultyId_1_termId_1', 'termId_1'];
+    for (const indexName of indexesToDrop) {
+      try {
+        await collection.dropIndex(indexName);
+      } catch (err) {
+        // Silent
+      }
+    }
+    
+    // Recreate proper non-unique index
+    await collection.createIndex({ facultyId: 1, termId: 1 });
+  } catch (err) {
+    // Silent - only log if there's a critical error
+    if (err.message.includes('connection')) {
+      console.log('⚠️  Database index check failed:', err.message);
+    }
+  }
+})
 .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes
@@ -91,6 +132,7 @@ app.use('/api/report', reportRoutes);
 app.use('/api/generate-final-report', finalReportRoutes);
 app.use('/api/generate-zip', zipRoutes);
 app.use('/api/generate-pdf-report', pdfReportRoutes);
+app.use('/api/generate-data-summary', dataSummaryRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

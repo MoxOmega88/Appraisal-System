@@ -41,7 +41,8 @@ export default function TermManagement() {
     }
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
+    e.preventDefault();
     try {
       await termService.create(currentTerm);
       setSuccess('Term created successfully');
@@ -52,7 +53,8 @@ export default function TermManagement() {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e) => {
+    e.preventDefault();
     try {
       await termService.update(currentTerm._id, currentTerm);
       setSuccess('Term updated successfully');
@@ -176,7 +178,8 @@ export default function TermManagement() {
           {editMode ? 'Edit Term' : 'Create New Term'}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Box component="form" id="term-form" onSubmit={editMode ? handleUpdate : handleCreate}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -185,6 +188,7 @@ export default function TermManagement() {
                 onChange={(e) => setCurrentTerm({...currentTerm, termName: e.target.value})}
                 required
                 placeholder="e.g., Monsoon 2024"
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -195,6 +199,7 @@ export default function TermManagement() {
                 onChange={(e) => setCurrentTerm({...currentTerm, academicYear: e.target.value})}
                 required
                 placeholder="e.g., 2024-2025"
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -228,13 +233,15 @@ export default function TermManagement() {
                 onChange={(e) => setCurrentTerm({...currentTerm, durationMonths: e.target.value})}
                 required
                 inputProps={{ min: 1 }}
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
           </Grid>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={editMode ? handleUpdate : handleCreate} variant="contained">
+          <Button type="submit" form="term-form" variant="contained">
             {editMode ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

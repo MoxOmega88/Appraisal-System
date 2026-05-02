@@ -70,60 +70,18 @@ export default function GenericCRUDPage({
   };
 
   const validateForm = () => {
+    // Use native HTML5 validation - just check file types
     for (const field of formFields) {
-      if (field.required) {
+      if (field.type === 'file' && field.required) {
         const value = currentItem[field.name];
-        
-        if (field.type === 'file') {
-          if (editMode && currentItem.documents && currentItem.documents.length > 0) {
-            continue;
-          }
-          if (!value) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Validation Error',
-              text: `${field.label} is required`
-            });
-            return false;
-          }
-        } else if (!value || (typeof value === 'string' && value.trim() === '')) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Validation Error',
-            text: `${field.label} is required`
-          });
-          return false;
+        if (editMode && currentItem.documents && currentItem.documents.length > 0) {
+          continue;
+        }
+        if (!value) {
+          return false; // Let HTML5 handle the error display
         }
       }
     }
-
-    if (currentItem.numberOfStudents !== undefined && currentItem.numberOfStudents < 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Number of students cannot be negative'
-      });
-      return false;
-    }
-
-    if (currentItem.numberOfScholars !== undefined && currentItem.numberOfScholars < 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Number of scholars cannot be negative'
-      });
-      return false;
-    }
-
-    if (currentItem.rating !== undefined && (currentItem.rating < 1 || currentItem.rating > 5)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Rating must be between 1 and 5'
-      });
-      return false;
-    }
-
     return true;
   };
 
@@ -135,7 +93,10 @@ export default function GenericCRUDPage({
       Swal.fire({
         icon: 'error',
         title: 'Invalid File Type',
-        text: 'Only PDF, JPG, JPEG, and PNG files are allowed'
+        text: 'Only PDF, JPG, JPEG, and PNG files are allowed',
+        customClass: {
+          container: 'swal-high-zindex'
+        }
       });
       return false;
     }
@@ -145,7 +106,10 @@ export default function GenericCRUDPage({
       Swal.fire({
         icon: 'error',
         title: 'File Too Large',
-        text: 'File size must be less than 50MB'
+        text: 'File size must be less than 50MB',
+        customClass: {
+          container: 'swal-high-zindex'
+        }
       });
       return false;
     }
@@ -153,7 +117,8 @@ export default function GenericCRUDPage({
     return true;
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
+    e.preventDefault();
     if (!validateForm()) return;
 
     try {
@@ -187,7 +152,8 @@ export default function GenericCRUDPage({
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e) => {
+    e.preventDefault();
     if (!validateForm()) return;
 
     try {
@@ -233,7 +199,10 @@ export default function GenericCRUDPage({
       showCancelButton: true,
       confirmButtonColor: '#d32f2f',
       cancelButtonColor: '#1976d2',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        container: 'swal-high-zindex'
+      }
     });
 
     if (result.isConfirmed) {
@@ -333,7 +302,7 @@ export default function GenericCRUDPage({
         value={currentItem[field.name] || ''}
         onChange={(e) => handleFieldChange(field.name, e.target.value)}
         required={field.required}
-        InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
+        InputLabelProps={{ shrink: true }}
         inputProps={field.inputProps}
         multiline={field.multiline}
         rows={field.rows}
@@ -437,18 +406,21 @@ export default function GenericCRUDPage({
           {editMode ? 'Edit Record' : 'Add New Record'}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Box component="form" id="crud-form" onSubmit={editMode ? handleUpdate : handleCreate}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
             {formFields.filter(f => !(f.type === 'file' && !(service && service.proofAllowed))).map((field) => (
               <Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={field.name}>
                 {renderFormField(field)}
               </Grid>
             ))}
           </Grid>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={handleClose} disabled={loading}>Cancel</Button>
           <Button 
-            onClick={editMode ? handleUpdate : handleCreate} 
+            type="submit"
+            form="crud-form"
             variant="contained"
             disabled={loading}
           >

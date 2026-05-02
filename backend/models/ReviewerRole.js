@@ -21,16 +21,35 @@ const reviewerRoleSchema = new mongoose.Schema({
     required: [true, 'Role type is required'],
     enum: ['Conference Chair', 'Session Chair', 'Reviewer']
   },
-  isQ1Q2Reviewer: {
-    type: Boolean,
-    default: false
-  },
   venueName: {
     type: String,
     trim: true
   },
+  type: {
+    type: String,
+    enum: ['Journal', 'Conference'],
+    default: null
+  },
+  quartile: {
+    type: String,
+    default: null
+  },
+  conferenceDetails: {
+    type: String,
+    default: null
+  },
+  month: {
+    type: Number,
+    min: 1,
+    max: 12,
+    default: null
+  },
   year: {
     type: Number
+  },
+  isQ1Q2Reviewer: {
+    type: Boolean,
+    default: false
   },
   documents: [{
     fileName: String,

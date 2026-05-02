@@ -67,7 +67,7 @@ const moduleConfigs = {
     title: 'FCI Score',
     apiEndpoint: '/fci-scores',
     fields: [
-      { name: 'averageScore', label: 'Average Score (0-10)', type: 'number', required: true },
+      { name: 'averageScore', label: 'Average Score (0-100)', type: 'number', required: true, min: 0, max: 100 },
       { name: 'numberOfCourses', label: 'Number of Courses', type: 'number', required: true },
       { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
@@ -77,7 +77,7 @@ const moduleConfigs = {
     apiEndpoint: '/ug-guidance',
     fields: [
       { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
-      { name: 'projectTitle', label: 'Project Title', type: 'text', required: false },
+      { name: 'projectTitle', label: 'Project Title', type: 'text', required: true },
       { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
@@ -86,7 +86,7 @@ const moduleConfigs = {
     apiEndpoint: '/masters-guidance',
     fields: [
       { name: 'numberOfStudents', label: 'Number of Students', type: 'number', required: true },
-      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: false },
+      { name: 'thesisTitle', label: 'Thesis Title', type: 'text', required: true },
       { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
@@ -95,8 +95,7 @@ const moduleConfigs = {
     apiEndpoint: '/phd-guidance',
     fields: [
       { name: 'numberOfScholars', label: 'Number of Scholars', type: 'number', required: true },
-      { name: 'scholarName', label: 'Scholar Name', type: 'text', required: false },
-      { name: 'researchArea', label: 'Research Area', type: 'text', required: false },
+      { name: 'researchArea', label: 'Research Area', type: 'text', required: true },
       { name: 'status', label: 'Status', type: 'select', required: true, options: ['Ongoing', 'Completed', 'Submitted'] }
     ]
   },
@@ -108,7 +107,8 @@ const moduleConfigs = {
       { name: 'fundingAmount', label: 'Funding Amount', type: 'number', required: true },
       { name: 'category', label: 'Category', type: 'select', required: true, options: ['≥10 Lakhs', '5-10 Lakhs', '1-5 Lakhs', '<1 Lakh'] },
       { name: 'fundingAgency', label: 'Funding Agency', type: 'text', required: false },
-      { name: 'startDate', label: 'Start Date', type: 'date', required: false }
+      { name: 'startDate', label: 'Start Date', type: 'date', required: false },
+      { name: 'endDate', label: 'End Date', type: 'date', required: false }
     ]
   },
   'consulting-projects': {
@@ -126,19 +126,72 @@ const moduleConfigs = {
     apiEndpoint: '/reviewer-roles',
     fields: [
       { name: 'roleType', label: 'Role Type', type: 'select', required: true, options: ['Conference Chair', 'Session Chair', 'Reviewer'] },
-      { name: 'venueName', label: 'Venue Name (Journal/Conference)', type: 'text', required: false },
-      { name: 'year', label: 'Year', type: 'number', required: false },
-      { name: 'isQ1Q2Reviewer', label: 'Q1/Q2 Journal Reviewer', type: 'select', required: false, options: [false, true] }
+      { name: 'venueName', label: 'Name', type: 'text', required: true },
+      { name: 'type', label: 'Type', type: 'select', required: true, options: ['Journal', 'Conference'] },
+      { 
+        name: 'details', 
+        label: 'Details', 
+        type: 'text', 
+        required: true,
+        dynamicLabel: (item) => {
+          return item.type === 'Journal' ? 'Quartile (Q1/Q2/Q3)' : 'Conference Details';
+        },
+        customDisplay: (item) => {
+          if (item.type === 'Journal') {
+            return item.quartile || '-';
+          } else if (item.type === 'Conference') {
+            return item.conferenceDetails || '-';
+          }
+          return '-';
+        }
+      },
+      { 
+        name: 'month', 
+        label: 'Month', 
+        type: 'select', 
+        required: true, 
+        options: [
+          { value: 1, label: 'January' },
+          { value: 2, label: 'February' },
+          { value: 3, label: 'March' },
+          { value: 4, label: 'April' },
+          { value: 5, label: 'May' },
+          { value: 6, label: 'June' },
+          { value: 7, label: 'July' },
+          { value: 8, label: 'August' },
+          { value: 9, label: 'September' },
+          { value: 10, label: 'October' },
+          { value: 11, label: 'November' },
+          { value: 12, label: 'December' }
+        ],
+        gridLayout: { xs: 6 },
+        customDisplay: (item) => {
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          if (item.month && item.year) {
+            return `${monthNames[item.month - 1]} ${item.year}`;
+          }
+          return '-';
+        }
+      },
+      { name: 'year', label: 'Year', type: 'number', required: true, gridLayout: { xs: 6 }, hideInTable: true }
     ]
   },
   'fdp-organized': {
     title: 'FDP/Events Organized',
     apiEndpoint: '/fdp-organized',
+    autoCalcDuration: true,
     fields: [
       { name: 'eventTitle', label: 'Event Title', type: 'text', required: true },
-      { name: 'durationCategory', label: 'Duration', type: 'select', required: true, options: ['5 Days', '3 Days', 'Other'] },
       { name: 'startDate', label: 'Start Date', type: 'date', required: true },
-      { name: 'endDate', label: 'End Date', type: 'date', required: false }
+      { name: 'endDate', label: 'End Date', type: 'date', required: true },
+      {
+        name: 'durationCategory',
+        label: 'Duration (Days)',
+        type: 'number',
+        required: true,
+        readOnly: false,
+        customDisplay: (item) => item.durationCategory ? `${item.durationCategory} Days` : '-'
+      }
     ]
   },
   'invited-talks': {
@@ -156,7 +209,7 @@ const moduleConfigs = {
     fields: [
       { name: 'type', label: 'Type', type: 'select', required: true, options: ['FDP', 'Seminar', 'Workshop', 'Conference'] },
       { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-      { name: 'organization', label: 'Organization', type: 'text', required: false },
+      { name: 'organization', label: 'Organization', type: 'text', required: true },
       { name: 'date', label: 'Date', type: 'date', required: true }
     ]
   },
@@ -200,7 +253,7 @@ const moduleConfigs = {
     title: 'Professionalism',
     apiEndpoint: '/professionalism',
     fields: [
-      { name: 'rating', label: 'Rating (1-10)', type: 'number', required: true },
+      { name: 'activityName', label: 'Name', type: 'text', required: true },
       { name: 'remarks', label: 'Remarks', type: 'textarea', required: false }
     ]
   },
@@ -228,6 +281,7 @@ const UniversalModulePage = ({ moduleKey }) => {
       fields={config.fields}
       termRequired={true}
       supportsFileUpload={true}
+      autoCalcDuration={config.autoCalcDuration || false}
     />
   );
 };

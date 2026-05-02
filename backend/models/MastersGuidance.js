@@ -21,8 +21,19 @@ const mastersGuidanceSchema = new mongoose.Schema({
     required: [true, 'Number of students is required'],
     min: 0
   },
+  students: [{
+    name: {
+      type: String,
+      trim: true
+    },
+    usn: {
+      type: String,
+      trim: true
+    }
+  }],
   thesisTitle: {
     type: String,
+    required: [true, 'Thesis title is required'],
     trim: true
   },
   remarks: {

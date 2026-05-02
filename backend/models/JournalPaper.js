@@ -45,6 +45,10 @@ const journalPaperSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  proofUrl: {
+    type: String,
+    trim: true
+  },
   documents: [{
     fileName: String,
     filePath: String,

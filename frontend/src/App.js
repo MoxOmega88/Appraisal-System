@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from './context/authContext';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AdminDashboard from './pages/AdminDashboard';
 import DashboardNew from './pages/DashboardNew';
 import TermManagement from './pages/TermManagement';
 import JournalPapersPageNew from './pages/JournalPapersPageNew';
@@ -23,9 +24,6 @@ import {
   DisclosuresPageNew,
   NonIndexedPublicationsPageNew,
   FCIScorePageNew,
-  UGGuidancePageNew,
-  MastersGuidancePageNew,
-  PhDGuidancePageNew,
   FundedProjectsPageNew,
   ConsultingProjectsPageNew,
   ReviewerRolesPageNew,
@@ -39,6 +37,9 @@ import {
   ProfessionalismPageNew,
   OtherContributionsPageNew
 } from './pages/UniversalModulePage';
+import UGGuidanceCustomPage from './pages/UGGuidanceCustomPage';
+import MastersGuidanceCustomPage from './pages/MastersGuidanceCustomPage';
+import PhDGuidanceCustomPage from './pages/PhDGuidanceCustomPage';
 
 // Layout
 import Layout from './components/Layout';
@@ -127,6 +128,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
       
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardNew />} />
@@ -138,9 +140,9 @@ function AppRoutes() {
         <Route path="books" element={<BooksPageNew />} />
         <Route path="disclosures" element={<DisclosuresPageNew />} />
         <Route path="patents" element={<PatentsPageNew />} />
-        <Route path="ug-guidance" element={<UGGuidancePageNew />} />
-        <Route path="masters-guidance" element={<MastersGuidancePageNew />} />
-        <Route path="phd-guidance" element={<PhDGuidancePageNew />} />
+        <Route path="ug-guidance" element={<UGGuidanceCustomPage />} />
+        <Route path="masters-guidance" element={<MastersGuidanceCustomPage />} />
+        <Route path="phd-guidance" element={<PhDGuidanceCustomPage />} />
         <Route path="funded-projects" element={<FundedProjectsPageNew />} />
         <Route path="consulting-projects" element={<ConsultingProjectsPageNew />} />
         <Route path="reviewer-roles" element={<ReviewerRolesPageNew />} />

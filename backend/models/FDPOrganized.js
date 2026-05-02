@@ -22,9 +22,9 @@ const fdpOrganizedSchema = new mongoose.Schema({
     trim: true
   },
   durationCategory: {
-    type: String,
-    required: [true, 'Duration category is required'],
-    enum: ['5 Days', '3 Days', 'Other']
+    type: Number,
+    required: [true, 'Duration is required'],
+    min: [1, 'Duration must be at least 1 day']
   },
   startDate: {
     type: Date,

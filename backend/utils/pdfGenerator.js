@@ -69,8 +69,8 @@ const generateAppraisalPDF = async (facultyData, termData, appraisalData) => {
         { key: 'institutionalServices', title: '19. Institutional Services', fields: ['role', 'serviceName', 'description'] },
         { key: 'otherServices', title: '20. Other Services', fields: ['description', 'date'] },
         { key: 'awards', title: '21. Awards & Honours', fields: ['title', 'issuingBody', 'date'] },
-        { key: 'professionalism', title: '22. Professionalism', fields: ['rating', 'remarks'] },
-        { key: 'otherContributions', title: '23. Other Contributions', fields: ['description'] }
+        { key: 'professionalism', title: '22. Professionalism', fields: ['activityName', 'remarks'] },
+        { key: 'otherContributions', title: '23. Other Contributions', fields: ['title', 'description'] }
       ];
 
       categories.forEach((category, catIndex) => {

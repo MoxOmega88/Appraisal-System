@@ -5,10 +5,10 @@ const { upload } = require('../middleware/uploadMiddleware');
 const { generateZipOnly } = require('../controllers/zipController');
 
 /**
- * @route   GET /api/generate-zip/:termId
- * @desc    Generate ZIP file with only uploaded files (no PDF)
+ * @route   POST /api/generate-zip/:termId
+ * @desc    Generate ZIP file with only uploaded files (no PDF) - with module selection
  * @access  Private
  */
-router.get('/:termId', protect, generateZipOnly);
+router.post('/:termId', protect, generateZipOnly);
 
 module.exports = router;

@@ -62,6 +62,24 @@ const createController = (Model, modelName) => {
       try {
         const modelKey = Model.modelName;
 
+        // Debug logging (development only)
+        if (process.env.NODE_ENV === 'development') {
+          if (modelKey === 'UGGuidance' || modelKey === 'MastersGuidance' || modelKey === 'PhDGuidance') {
+            console.log(`=== ${modelKey.toUpperCase()} CREATE DEBUG ===`);
+            console.log('REQ BODY:', req.body);
+            console.log('Students/Scholars field:', req.body.students || req.body.scholars);
+            console.log('Type:', typeof (req.body.students || req.body.scholars));
+          }
+
+          if (modelKey === 'ReviewerRole') {
+            console.log('=== REVIEWER ROLE CREATE DEBUG ===');
+            console.log('REQ BODY:', req.body);
+            console.log('Type:', req.body.type);
+            console.log('Quartile:', req.body.quartile);
+            console.log('Conference Details:', req.body.conferenceDetails);
+          }
+        }
+
         // Validation for specific models
         if (modelKey === 'UGGuidance' || modelKey === 'MastersGuidance') {
           const numberOfStudents = req.body.numberOfStudents;
@@ -98,20 +116,11 @@ const createController = (Model, modelName) => {
           }
         }
 
-        if (modelKey === 'OtherService' || modelKey === 'OtherContribution') {
-          if (!req.body.description || req.body.description.trim() === '') {
+        if (modelKey === 'OtherService') {
+          if (!req.body.serviceName || req.body.serviceName.trim() === '') {
             return res.status(400).json({
               success: false,
-              message: "Description is required"
-            });
-          }
-        }
-
-        if (modelKey === 'Professionalism') {
-          if (req.body.rating === undefined || req.body.rating === null || isNaN(Number(req.body.rating)) || Number(req.body.rating) < 1 || Number(req.body.rating) > 5) {
-            return res.status(400).json({
-              success: false,
-              message: "Rating is required and must be between 1 and 5"
+              message: "Service name is required"
             });
           }
         }
@@ -120,6 +129,52 @@ const createController = (Model, modelName) => {
           ...req.body,
           facultyId: req.user._id
         };
+
+        // Handle students array for UGGuidance or MastersGuidance - parse JSON string
+        if ((modelKey === 'UGGuidance' || modelKey === 'MastersGuidance') && req.body.students) {
+          try {
+            recordData.students = typeof req.body.students === 'string' 
+              ? JSON.parse(req.body.students) 
+              : req.body.students;
+            console.log(`${modelKey} - Parsed students:`, recordData.students);
+          } catch (e) {
+            console.error(`${modelKey} - Error parsing students:`, e);
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid students data format'
+            });
+          }
+        }
+
+        // Handle scholars array for PhDGuidance - parse JSON string
+        if (modelKey === 'PhDGuidance' && req.body.scholars) {
+          try {
+            recordData.scholars = typeof req.body.scholars === 'string' 
+              ? JSON.parse(req.body.scholars) 
+              : req.body.scholars;
+            console.log(`${modelKey} - Parsed scholars:`, recordData.scholars);
+          } catch (e) {
+            console.error(`${modelKey} - Error parsing scholars:`, e);
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid scholars data format'
+            });
+          }
+        }
+
+        // Handle conditional fields for ReviewerRole AFTER recordData is created
+        if (modelKey === 'ReviewerRole') {
+          if (req.body.type === 'Journal') {
+            recordData.quartile = req.body.quartile || '';
+            recordData.conferenceDetails = '';
+          } else if (req.body.type === 'Conference') {
+            recordData.conferenceDetails = req.body.conferenceDetails || '';
+            recordData.quartile = '';
+          } else {
+            recordData.quartile = '';
+            recordData.conferenceDetails = '';
+          }
+        }
 
         if (req.files && req.files.length > 0) {
           recordData.documents = req.files.map(file => {
@@ -134,6 +189,16 @@ const createController = (Model, modelName) => {
         }
 
         const record = await Model.create(recordData);
+        
+        // Debug log (development only)
+        if (process.env.NODE_ENV === 'development') {
+          if (modelKey === 'UGGuidance' || modelKey === 'MastersGuidance' || modelKey === 'PhDGuidance') {
+            console.log('Created record:', record);
+            console.log('Created record students/scholars:', record.students || record.scholars);
+            console.log('=== END DEBUG ===');
+          }
+        }
+        
         res.status(201).json({
           success: true,
           message: `${modelName} created successfully`,
@@ -207,6 +272,54 @@ const createController = (Model, modelName) => {
 
         const updateData = req.body;
 
+        // Handle students array for UGGuidance or MastersGuidance - parse JSON string
+        if ((modelKey === 'UGGuidance' || modelKey === 'MastersGuidance') && req.body.students) {
+          try {
+            updateData.students = typeof req.body.students === 'string' 
+              ? JSON.parse(req.body.students) 
+              : req.body.students;
+          } catch (e) {
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid students data format'
+            });
+          }
+        }
+
+        // Handle scholars array for PhDGuidance - parse JSON string
+        if (modelKey === 'PhDGuidance' && req.body.scholars) {
+          try {
+            updateData.scholars = typeof req.body.scholars === 'string' 
+              ? JSON.parse(req.body.scholars) 
+              : req.body.scholars;
+          } catch (e) {
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid scholars data format'
+            });
+          }
+        }
+
+        // Handle conditional fields for ReviewerRole in update
+        if (modelKey === 'ReviewerRole') {
+          if (req.body.type === 'Journal') {
+            updateData.quartile = req.body.quartile || '';
+            updateData.conferenceDetails = '';
+          } else if (req.body.type === 'Conference') {
+            updateData.conferenceDetails = req.body.conferenceDetails || '';
+            updateData.quartile = '';
+          } else {
+            updateData.quartile = '';
+            updateData.conferenceDetails = '';
+          }
+        }
+
+        // Remove documents from updateData if it's coming from form (not file upload)
+        // This prevents the "[object Object]" error
+        if (updateData.documents && typeof updateData.documents === 'string') {
+          delete updateData.documents;
+        }
+
         if (req.files && req.files.length > 0) {
           const newDocuments = req.files.map(file => {
             // Extract relative path from uploads folder
@@ -217,7 +330,8 @@ const createController = (Model, modelName) => {
               originalName: file.originalname
             };
           });
-          updateData.documents = [...(record.documents || []), ...newDocuments];
+          // REPLACE old documents with new ones instead of appending
+          updateData.documents = newDocuments;
         }
 
         const updatedRecord = await Model.findByIdAndUpdate(
@@ -225,6 +339,12 @@ const createController = (Model, modelName) => {
           updateData,
           { new: true, runValidators: true }
         );
+
+        // Debug logging (development only)
+        if (process.env.NODE_ENV === 'development' && modelKey === 'ReviewerRole') {
+          console.log('UPDATED RECORD:', updatedRecord);
+          console.log('=== END DEBUG ===');
+        }
 
         res.json({
           success: true,

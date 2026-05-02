@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Box, Typography, Chip, Stack } from '@mui/material';
 import { CloudUpload as CloudUploadIcon, CheckCircle as CheckCircleIcon, Close as CloseIcon } from '@mui/icons-material';
 
-const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png', label = 'Upload Files', multiple = true }) => {
+const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png', label = 'Upload Files', multiple = true, disabled = false }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleFileChange = (event) => {
@@ -28,6 +28,7 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
         type="file"
         multiple={multiple}
         onChange={handleFileChange}
+        disabled={disabled}
       />
       <label htmlFor="file-upload-button">
         <Button
@@ -35,6 +36,7 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
           component="span"
           startIcon={<CloudUploadIcon />}
           fullWidth
+          disabled={disabled}
           sx={{
             py: 1.5,
             borderStyle: 'dashed',
@@ -42,7 +44,7 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
             '&:hover': {
               borderStyle: 'dashed',
               borderWidth: 2,
-              backgroundColor: 'rgba(26, 35, 126, 0.04)'
+              backgroundColor: disabled ? 'transparent' : 'rgba(26, 35, 126, 0.04)'
             }
           }}
         >
@@ -58,7 +60,7 @@ const FileUploadButton = ({ onFileSelect, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.
                 key={index}
                 icon={<CheckCircleIcon />}
                 label={`${file.name} (${(file.size / 1024).toFixed(2)} KB)`}
-                onDelete={() => handleRemoveFile(index)}
+                onDelete={disabled ? undefined : () => handleRemoveFile(index)}
                 deleteIcon={<CloseIcon />}
                 color="success"
                 variant="outlined"

@@ -5,10 +5,12 @@
 
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   Box, Drawer, AppBar, Toolbar, List, Typography, Divider,
   ListItem, ListItemButton, ListItemIcon, ListItemText, IconButton,
-  Avatar, Menu, MenuItem
+  Avatar, Menu, MenuItem, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Button, CircularProgress, Alert
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -21,7 +23,9 @@ import {
   Business as BusinessIcon,
   EmojiEvents as EmojiEventsIcon,
   Menu as MenuIcon,
-  AccountCircle
+  AccountCircle,
+  Lock as LockIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/authContext';
 
@@ -66,6 +70,12 @@ const menuItems = [
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -85,6 +95,64 @@ export default function Layout() {
     handleMenuClose();
     logout();
     navigate('/login');
+  };
+
+  const handleChangePasswordClick = () => {
+    handleMenuClose();
+    setChangePasswordOpen(true);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError('');
+  };
+
+  const handleChangePasswordClose = () => {
+    if (!changingPassword) {
+      setChangePasswordOpen(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError('');
+    }
+  };
+
+  const handleChangePasswordSubmit = async () => {
+    // Validate new password
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters');
+      return;
+    }
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    setChangingPassword(true);
+    setPasswordError('');
+
+    try {
+      // Call API to change password using axios
+      const response = await axios.post('/api/auth/change-password', {
+        currentPassword,
+        newPassword
+      });
+
+      if (response.data.success) {
+        setChangingPassword(false);
+        setChangePasswordOpen(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        alert('Password changed successfully!');
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      const errorMessage = error.response?.data?.message || 'Error changing password. Please try again.';
+      setPasswordError(errorMessage);
+      setChangingPassword(false);
+    }
   };
 
   const drawer = (
@@ -195,8 +263,28 @@ export default function Layout() {
                 {user?.employeeId} • {user?.department}
               </Typography>
             </MenuItem>
+            <MenuItem disabled>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                Last Login: {user?.lastLogin 
+                  ? new Date(user.lastLogin).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : 'First Login'}
+              </Typography>
+            </MenuItem>
             <Divider />
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem onClick={handleChangePasswordClick}>
+              <LockIcon sx={{ mr: 1, fontSize: 20 }} />
+              Change Password
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <LogoutIcon sx={{ mr: 1, fontSize: 20 }} />
+              Logout
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
@@ -242,6 +330,92 @@ export default function Layout() {
       >
         <Outlet />
       </Box>
+
+      {/* Change Password Dialog */}
+      <Dialog 
+        open={changePasswordOpen} 
+        onClose={handleChangePasswordClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: '#1976d2', color: 'white' }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <LockIcon />
+            <Typography variant="h6" fontWeight="bold">
+              Change Password
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Enter your current password and choose a new password
+          </Typography>
+
+          {passwordError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {passwordError}
+            </Alert>
+          )}
+
+          <TextField
+            fullWidth
+            label="Current Password"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Enter current password"
+            margin="normal"
+            disabled={changingPassword}
+            autoFocus
+          />
+
+          <TextField
+            fullWidth
+            label="New Password"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password (min 6 characters)"
+            margin="normal"
+            disabled={changingPassword}
+            helperText="Password must be at least 6 characters"
+          />
+
+          <TextField
+            fullWidth
+            label="Confirm New Password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter new password"
+            margin="normal"
+            disabled={changingPassword}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && currentPassword && newPassword && confirmPassword) {
+                handleChangePasswordSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, gap: 1 }}>
+          <Button 
+            onClick={handleChangePasswordClose}
+            variant="outlined"
+            disabled={changingPassword}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleChangePasswordSubmit}
+            variant="contained"
+            color="primary"
+            disabled={!currentPassword || !newPassword || !confirmPassword || changingPassword}
+            startIcon={changingPassword ? <CircularProgress size={20} color="inherit" /> : <LockIcon />}
+          >
+            {changingPassword ? 'Changing...' : 'Change Password'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

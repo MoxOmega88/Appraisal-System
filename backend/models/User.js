@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema({
   joiningDate: {
     type: Date,
     required: [true, 'Joining date is required']
+  },
+  lastLogin: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

@@ -75,6 +75,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -86,6 +87,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -97,6 +99,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -107,6 +110,7 @@ export default function Register() {
                   value={formData.employeeId}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -117,6 +121,7 @@ export default function Register() {
                   value={formData.department}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -127,6 +132,7 @@ export default function Register() {
                   value={formData.designation}
                   onChange={handleChange}
                   required
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

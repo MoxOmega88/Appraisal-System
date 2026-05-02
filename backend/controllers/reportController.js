@@ -81,7 +81,7 @@ const generateReport = async (req, res) => {
       InstitutionalService.find({ termId }),
       OtherService.find({ termId }),
       Award.find({ termId }),
-      Professionalism.findOne({ termId }),
+      Professionalism.find({ termId }),
       OtherContribution.find({ termId })
     ]);
     
@@ -320,8 +320,19 @@ function addAwardsAndOthers(doc, awards, professionalism, others) {
   doc.moveDown(0.5);
   doc.fontSize(10).font('Helvetica');
   doc.text(`Awards: ${awards.length}`);
-  if (professionalism) {
-    doc.text(`Professionalism Rating: ${professionalism.rating}/5`);
+  if (professionalism && professionalism.length > 0) {
+    doc.text('Professionalism / Team Spirit:');
+    professionalism.forEach((item, index) => {
+      const name = item.activityName || '';
+      const remarks = item.remarks || '';
+      if (name && remarks) {
+        doc.text(`${index + 1}. ${name} - ${remarks}`, { indent: 20 });
+      } else if (name) {
+        doc.text(`${index + 1}. ${name}`, { indent: 20 });
+      } else if (remarks) {
+        doc.text(`${index + 1}. ${remarks}`, { indent: 20 });
+      }
+    });
   }
   doc.text(`Other Contributions: ${others.length}`);
   doc.moveDown();

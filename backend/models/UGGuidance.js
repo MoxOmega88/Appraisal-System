@@ -21,8 +21,19 @@ const ugGuidanceSchema = new mongoose.Schema({
     required: [true, 'Number of students is required'],
     min: 0
   },
+  students: [{
+    name: {
+      type: String,
+      trim: true
+    },
+    usn: {
+      type: String,
+      trim: true
+    }
+  }],
   projectTitle: {
     type: String,
+    required: [true, 'Project title is required'],
     trim: true
   },
   remarks: {

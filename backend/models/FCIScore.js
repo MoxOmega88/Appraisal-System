@@ -20,7 +20,7 @@ const fciScoreSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Average score is required'],
     min: 0,
-    max: 10
+    max: 100
   },
   numberOfCourses: {
     type: Number,

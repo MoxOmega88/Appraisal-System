@@ -14,14 +14,12 @@ const professionalismSchema = new mongoose.Schema({
   termId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Term',
-    required: true,
-    unique: true
+    required: true
   },
-  rating: {
-    type: Number,
-    required: [true, 'Rating is required'],
-    min: 1,
-    max: 5
+  activityName: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true
   },
   remarks: {
     type: String,

@@ -16,9 +16,13 @@ const otherContributionSchema = new mongoose.Schema({
     ref: 'Term',
     required: true
   },
+  title: {
+    type: String,
+    required: [true, 'Title is required'],
+    trim: true
+  },
   description: {
     type: String,
-    required: [true, 'Description is required'],
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
   },

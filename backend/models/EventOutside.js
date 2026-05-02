@@ -28,6 +28,7 @@ const eventOutsideSchema = new mongoose.Schema({
   },
   organization: {
     type: String,
+    required: [true, 'Organization is required'],
     trim: true
   },
   date: {
