@@ -32,6 +32,25 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate email domain
+    if (!formData.email.endsWith('@msrit.edu')) {
+      setError('Email must be from @msrit.edu domain');
+      return;
+    }
+
+    // Validate employee ID (exactly 5 digits)
+    if (!/^\d{5}$/.test(formData.employeeId)) {
+      setError('Employee ID must be exactly 5 digits');
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -88,6 +107,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  helperText="Must be @msrit.edu email"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -100,6 +120,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  helperText="Minimum 6 characters"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -111,6 +132,8 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   InputLabelProps={{ shrink: true }}
+                  helperText="Must be exactly 5 digits"
+                  inputProps={{ maxLength: 5, pattern: '[0-9]*' }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

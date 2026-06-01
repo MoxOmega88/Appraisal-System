@@ -20,6 +20,13 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password, employeeId, department, designation, joiningDate } = req.body;
 
+    // Validate password length
+    if (!password || password.length < 6) {
+      return res.status(400).json({ 
+        message: 'Password must be at least 6 characters long' 
+      });
+    }
+
     // Check if user exists
     const userExists = await User.findOne({ $or: [{ email }, { employeeId }] });
 
@@ -55,7 +62,14 @@ const registerUser = async (req, res) => {
     }
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Server error during registration', error: error.message });
+    
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
